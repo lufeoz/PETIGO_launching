@@ -410,6 +410,83 @@
     width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
   }
 
+  /* ───── EDITABLE TASKS ───── */
+  .task-checkbox {
+    width: 18px; height: 18px;
+    border: 2px solid var(--charcoal-3);
+    border-radius: 4px;
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s ease;
+    margin-top: 2px;
+  }
+  .task-checkbox:hover { border-color: var(--orange); }
+  .task-checkbox.checked {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .task-checkbox.checked::after {
+    content: '✓';
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .task-item.completed .task-title {
+    text-decoration: line-through;
+    opacity: 0.4;
+  }
+  .task-item.completed .task-detail,
+  .task-item.completed .task-deadline {
+    opacity: 0.35;
+  }
+  .task-item.completed .task-checkbox {
+    opacity: 0.7;
+  }
+  .actions-grid [contenteditable]:hover {
+    outline: 1px dashed rgba(255,107,26,0.45);
+    border-radius: 3px;
+    cursor: text;
+  }
+  .actions-grid [contenteditable]:focus {
+    outline: 1px solid var(--orange);
+    border-radius: 3px;
+    background: rgba(255,107,26,0.06);
+  }
+  .add-task-btn {
+    width: 100%;
+    margin-top: 6px;
+    padding: 9px;
+    background: transparent;
+    border: 1px dashed var(--charcoal-3);
+    border-radius: 8px;
+    color: var(--grey);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  }
+  .add-task-btn:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+    background: rgba(255,107,26,0.05);
+  }
+  .task-delete-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--grey-2);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 2px;
+    flex-shrink: 0;
+    margin-top: 0;
+    transition: color 0.15s;
+  }
+  .task-item:hover .task-delete-btn { display: block; }
+  .task-delete-btn:hover { color: #FF3B30; }
+
   /* ───── HOVER EFFECTS ───── */
   .stat-card,
   .person-card,
@@ -1272,6 +1349,165 @@
     </div>
   </div>
 </div>
+
+<!-- ─── SCRIPT: EDITABLE NEXT ACTIONS ─── -->
+<script>
+(function () {
+  const TASK_STATE_KEY = 'petigo_task_state';
+  const NEW_TASKS_KEY  = 'petigo_new_tasks';
+
+  function loadState()    { try { return JSON.parse(localStorage.getItem(TASK_STATE_KEY)) || {}; } catch { return {}; } }
+  function saveState(s)   { localStorage.setItem(TASK_STATE_KEY, JSON.stringify(s)); }
+  function loadNew()      { try { return JSON.parse(localStorage.getItem(NEW_TASKS_KEY))  || []; } catch { return []; } }
+  function saveNew(arr)   { localStorage.setItem(NEW_TASKS_KEY,  JSON.stringify(arr)); }
+
+  function attachItemEvents(item, listIdx) {
+    const id       = item.dataset.taskId;
+    const checkbox = item.querySelector('.task-checkbox');
+    const title    = item.querySelector('.task-title');
+    const detail   = item.querySelector('.task-detail');
+    const delBtn   = item.querySelector('.task-delete-btn');
+
+    checkbox.addEventListener('click', () => {
+      const done = item.classList.toggle('completed');
+      checkbox.classList.toggle('checked', done);
+      const s = loadState();
+      s[id] = { ...(s[id] || {}), completed: done };
+      saveState(s);
+    });
+
+    if (title) title.addEventListener('blur', () => {
+      const s = loadState();
+      s[id] = { ...(s[id] || {}), title: title.innerText };
+      saveState(s);
+      persistNewTasks();
+    });
+
+    if (detail) detail.addEventListener('blur', () => {
+      const s = loadState();
+      s[id] = { ...(s[id] || {}), detail: detail.innerText };
+      saveState(s);
+      persistNewTasks();
+    });
+
+    delBtn.addEventListener('click', () => {
+      const s = loadState();
+      delete s[id];
+      saveState(s);
+      item.remove();
+      persistNewTasks();
+    });
+  }
+
+  function persistNewTasks() {
+    const lists = document.querySelectorAll('.actions-grid .task-list');
+    const arr = [];
+    lists.forEach((list, listIdx) => {
+      list.querySelectorAll('.task-item[data-new="true"]').forEach(item => {
+        const title  = item.querySelector('.task-title');
+        const detail = item.querySelector('.task-detail');
+        const dl     = item.querySelector('.task-deadline');
+        arr.push({
+          listIdx,
+          id:       item.dataset.taskId,
+          deadline: dl     ? dl.innerText     : '',
+          title:    title  ? title.innerText  : '',
+          detail:   detail ? detail.innerText : '',
+          completed: item.classList.contains('completed')
+        });
+      });
+    });
+    saveNew(arr);
+  }
+
+  function createNewItem(listIdx, id, deadline, titleText, detailText, done) {
+    const item = document.createElement('div');
+    item.className = 'task-item';
+    item.dataset.taskId = id;
+    item.dataset.new = 'true';
+    item.innerHTML = `
+      <div class="task-checkbox${done ? ' checked' : ''}"></div>
+      <div class="task-deadline deadline-normal" contenteditable="true">${deadline}</div>
+      <div class="task-content">
+        <div class="task-title" contenteditable="true">${titleText}</div>
+        <div class="task-detail" contenteditable="true">${detailText}</div>
+      </div>
+      <button class="task-delete-btn" title="삭제">×</button>`;
+    if (done) item.classList.add('completed');
+    attachItemEvents(item, listIdx);
+    return item;
+  }
+
+  function initTasks() {
+    const state = loadState();
+    const lists = document.querySelectorAll('.actions-grid .task-list');
+
+    lists.forEach((list, listIdx) => {
+      // 기존 task-item 초기화
+      list.querySelectorAll('.task-item').forEach((item, taskIdx) => {
+        const id = `task-${listIdx}-${taskIdx}`;
+        item.dataset.taskId = id;
+
+        // 체크박스 추가
+        const checkbox = document.createElement('div');
+        checkbox.className = 'task-checkbox';
+        item.insertBefore(checkbox, item.firstChild);
+
+        // 삭제 버튼 추가
+        const delBtn = document.createElement('button');
+        delBtn.className = 'task-delete-btn';
+        delBtn.title = '삭제';
+        delBtn.textContent = '×';
+        item.appendChild(delBtn);
+
+        // contenteditable
+        const title  = item.querySelector('.task-title');
+        const detail = item.querySelector('.task-detail');
+        if (title)  title.contentEditable  = 'true';
+        if (detail) detail.contentEditable = 'true';
+
+        // 저장된 상태 복원
+        const saved = state[id];
+        if (saved?.completed) {
+          item.classList.add('completed');
+          checkbox.classList.add('checked');
+        }
+        if (saved?.title  && title)  title.innerText  = saved.title;
+        if (saved?.detail && detail) detail.innerText = saved.detail;
+
+        attachItemEvents(item, listIdx);
+      });
+
+      // 저장된 새 과업 복원
+      const savedNew = loadNew().filter(t => t.listIdx === listIdx);
+      savedNew.forEach(t => {
+        const item = createNewItem(listIdx, t.id, t.deadline, t.title, t.detail, t.completed);
+        list.appendChild(item);
+      });
+
+      // + 과업 추가 버튼
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-task-btn';
+      addBtn.textContent = '+ 과업 추가';
+      list.appendChild(addBtn);
+
+      addBtn.addEventListener('click', () => {
+        const id   = `new-${listIdx}-${Date.now()}`;
+        const item = createNewItem(listIdx, id, '기간', '새 과업 제목', '상세 내용을 입력하세요', false);
+        list.insertBefore(item, addBtn);
+        persistNewTasks();
+
+        // 제목 자동 선택
+        const title = item.querySelector('.task-title');
+        title.focus();
+        document.execCommand('selectAll', false, null);
+      });
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initTasks);
+})();
+</script>
 
 <!-- ─── FOOTER ─── -->
 <div class="footer">
