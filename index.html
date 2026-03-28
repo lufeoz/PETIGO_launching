@@ -36,12 +36,14 @@
   /* ───── HEADER ───── */
   .header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 36px;
     padding-bottom: 24px;
     border-bottom: 1px solid var(--charcoal-3);
   }
+
+  .header-left { display: flex; flex-direction: column; gap: 14px; }
 
   .logo-area { display: flex; align-items: center; gap: 14px; }
 
@@ -52,6 +54,7 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 22px; font-weight: 900; color: white;
     letter-spacing: -1px;
+    flex-shrink: 0;
   }
 
   .brand-name {
@@ -64,11 +67,153 @@
     letter-spacing: 1px; margin-top: 2px;
   }
 
-  .header-meta { text-align: right; }
+  /* 날짜·D-day — 로고 아래, 텍스트 기준 왼쪽 맞춤 */
+  .header-date {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-left: 58px; /* 44px logo + 14px gap */
+  }
+
   .today { font-size: 13px; color: var(--grey); }
-  .dday-wrap { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .dday-wrap { display: flex; align-items: center; gap: 8px; }
   .dday { font-size: 22px; font-weight: 800; color: var(--orange); }
   .dday-label { font-size: 11px; color: var(--grey); }
+
+  /* ───── HAMBURGER BUTTON ───── */
+  .hamburger-btn {
+    width: 40px; height: 40px;
+    background: var(--charcoal-2);
+    border: 1px solid var(--charcoal-3);
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 5px;
+    transition: border-color 0.15s, background 0.15s;
+    flex-shrink: 0;
+  }
+  .hamburger-btn:hover {
+    border-color: var(--orange);
+    background: rgba(255,107,26,0.1);
+  }
+  .hamburger-btn span {
+    width: 18px; height: 2px;
+    background: var(--white);
+    border-radius: 2px;
+    transition: transform 0.2s, opacity 0.2s;
+    display: block;
+  }
+  .hamburger-btn.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+  .hamburger-btn.active span:nth-child(2) { opacity: 0; width: 0; }
+  .hamburger-btn.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+  /* ───── CHANGELOG DRAWER ───── */
+  .drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    display: none;
+    backdrop-filter: blur(2px);
+  }
+  .drawer-overlay.show { display: block; }
+
+  .changelog-drawer {
+    position: fixed;
+    top: 0; right: -380px;
+    width: 360px; height: 100vh;
+    background: var(--charcoal-2);
+    border-left: 1px solid var(--charcoal-3);
+    z-index: 1000;
+    transition: right 0.25s ease;
+    display: flex; flex-direction: column;
+    box-shadow: -8px 0 40px rgba(0,0,0,0.5);
+  }
+  .changelog-drawer.open { right: 0; }
+
+  .drawer-header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--charcoal-3);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .drawer-title { font-size: 14px; font-weight: 700; color: var(--white); }
+  .drawer-subtitle { font-size: 11px; color: var(--grey); margin-top: 3px; }
+  .drawer-close {
+    background: none; border: none; color: var(--grey);
+    font-size: 22px; cursor: pointer; line-height: 1;
+    transition: color 0.15s; padding: 0;
+  }
+  .drawer-close:hover { color: var(--white); }
+
+  .drawer-clear-btn {
+    margin: 12px 16px 0;
+    padding: 8px;
+    background: transparent;
+    border: 1px solid var(--charcoal-3);
+    border-radius: 8px;
+    color: var(--grey);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .drawer-clear-btn:hover { border-color: #FF3B30; color: #FF3B30; }
+
+  .changelog-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .changelog-list::-webkit-scrollbar { width: 4px; }
+  .changelog-list::-webkit-scrollbar-track { background: transparent; }
+  .changelog-list::-webkit-scrollbar-thumb { background: var(--charcoal-3); border-radius: 2px; }
+
+  .changelog-empty {
+    text-align: center; color: var(--grey);
+    font-size: 12px; padding: 48px 20px;
+  }
+
+  .changelog-entry {
+    background: var(--charcoal);
+    border: 1px solid var(--charcoal-3);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .clog-time { font-size: 10px; color: var(--grey-2); margin-bottom: 5px; }
+  .clog-context {
+    font-size: 11px; font-weight: 700; color: var(--orange);
+    margin-bottom: 8px;
+  }
+  .clog-old {
+    font-size: 11px; color: var(--grey);
+    text-decoration: line-through;
+    background: rgba(255,59,48,0.08);
+    border-radius: 5px; padding: 5px 8px;
+    margin-bottom: 4px;
+    word-break: break-all;
+  }
+  .clog-arrow { font-size: 10px; color: var(--grey-2); text-align: center; margin: 2px 0; }
+  .clog-new {
+    font-size: 11px; color: var(--white);
+    background: rgba(52,199,89,0.08);
+    border-radius: 5px; padding: 5px 8px;
+    word-break: break-all;
+  }
+  .clog-badge {
+    display: inline-block;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 4px;
+    margin-bottom: 6px;
+  }
+  .clog-badge-edit { background: rgba(10,132,255,0.15); color: #4DA3FF; }
+  .clog-badge-check { background: rgba(52,199,89,0.15); color: var(--green); }
+  .clog-badge-add { background: rgba(255,214,10,0.15); color: #FFD60A; }
+  .clog-badge-delete { background: rgba(255,59,48,0.15); color: #FF3B30; }
 
   /* ───── CRITICAL PATH ───── */
   .critical-banner {
@@ -568,28 +713,50 @@
     .products-grid { grid-template-columns: repeat(2, 1fr); }
     .strategy-grid { grid-template-columns: 1fr; }
     body { padding: 20px 16px 48px; }
-    .header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .header-date { padding-left: 0; flex-wrap: wrap; gap: 12px; }
+    .changelog-drawer { width: 100vw; right: -100vw; }
   }
 </style>
 </head>
 <body>
 
 <!-- ─── HEADER ─── -->
-<div class="header">
-  <div class="logo-area">
-    <div class="logo-mark">P</div>
+<!-- ─── CHANGELOG DRAWER ─── -->
+<div class="drawer-overlay" id="drawerOverlay"></div>
+<div class="changelog-drawer" id="changelogDrawer">
+  <div class="drawer-header">
     <div>
-      <div class="brand-name">PETIGO</div>
-      <div class="brand-sub">TECHWEAR · OUTDOOR PET GEAR BRAND</div>
+      <div class="drawer-title">변경 이력</div>
+      <div class="drawer-subtitle">수정된 내용이 자동으로 기록됩니다</div>
+    </div>
+    <button class="drawer-close" id="drawerClose">×</button>
+  </div>
+  <button class="drawer-clear-btn" id="drawerClearBtn">전체 기록 삭제</button>
+  <div class="changelog-list" id="changelogList">
+    <div class="changelog-empty">아직 변경 이력이 없습니다.</div>
+  </div>
+</div>
+
+<div class="header">
+  <div class="header-left">
+    <div class="logo-area">
+      <div class="logo-mark">P</div>
+      <div>
+        <div class="brand-name">PETIGO</div>
+        <div class="brand-sub">TECHWEAR · OUTDOOR PET GEAR BRAND</div>
+      </div>
+    </div>
+    <div class="header-date">
+      <div class="today">2026년 3월 28일 (토) 기준</div>
+      <div class="dday-wrap">
+        <div class="dday">D-197</div>
+        <div class="dday-label">스마트스토어 론칭까지<br>(10월 12일 목표)</div>
+      </div>
     </div>
   </div>
-  <div class="header-meta">
-    <div class="today">2026년 3월 28일 (토) 기준</div>
-    <div class="dday-wrap">
-      <div class="dday">D-197</div>
-      <div class="dday-label">스마트스토어 론칭까지<br>(10월 12일 목표)</div>
-    </div>
-  </div>
+  <button class="hamburger-btn" id="hamburgerBtn">
+    <span></span><span></span><span></span>
+  </button>
 </div>
 
 <!-- ─── CRITICAL PATH ─── -->
@@ -1350,55 +1517,92 @@
   </div>
 </div>
 
-<!-- ─── SCRIPT: EDITABLE NEXT ACTIONS ─── -->
+<!-- ─── SCRIPT: EDITABLE NEXT ACTIONS + CHANGELOG ─── -->
 <script>
 (function () {
   const TASK_STATE_KEY = 'petigo_task_state';
   const NEW_TASKS_KEY  = 'petigo_new_tasks';
+  const CHANGELOG_KEY  = 'petigo_changelog';
 
-  function loadState()    { try { return JSON.parse(localStorage.getItem(TASK_STATE_KEY)) || {}; } catch { return {}; } }
-  function saveState(s)   { localStorage.setItem(TASK_STATE_KEY, JSON.stringify(s)); }
-  function loadNew()      { try { return JSON.parse(localStorage.getItem(NEW_TASKS_KEY))  || []; } catch { return []; } }
-  function saveNew(arr)   { localStorage.setItem(NEW_TASKS_KEY,  JSON.stringify(arr)); }
+  /* ── storage helpers ── */
+  function loadState()  { try { return JSON.parse(localStorage.getItem(TASK_STATE_KEY)) || {}; } catch { return {}; } }
+  function saveState(s) { localStorage.setItem(TASK_STATE_KEY, JSON.stringify(s)); }
+  function loadNew()    { try { return JSON.parse(localStorage.getItem(NEW_TASKS_KEY))  || []; } catch { return []; } }
+  function saveNew(a)   { localStorage.setItem(NEW_TASKS_KEY,  JSON.stringify(a)); }
+  function loadLog()    { try { return JSON.parse(localStorage.getItem(CHANGELOG_KEY))  || []; } catch { return []; } }
+  function saveLog(a)   { localStorage.setItem(CHANGELOG_KEY,  JSON.stringify(a)); }
 
-  function attachItemEvents(item, listIdx) {
-    const id       = item.dataset.taskId;
-    const checkbox = item.querySelector('.task-checkbox');
-    const title    = item.querySelector('.task-title');
-    const detail   = item.querySelector('.task-detail');
-    const delBtn   = item.querySelector('.task-delete-btn');
+  /* ── changelog ── */
+  function getPersonName(item) {
+    const card = item.closest('.person-card');
+    return card ? card.querySelector('.person-name').textContent.trim() : '알 수 없음';
+  }
 
-    checkbox.addEventListener('click', () => {
-      const done = item.classList.toggle('completed');
-      checkbox.classList.toggle('checked', done);
-      const s = loadState();
-      s[id] = { ...(s[id] || {}), completed: done };
-      saveState(s);
+  function addLog(type, context, oldVal, newVal) {
+    const log = loadLog();
+    log.unshift({
+      type,
+      context,
+      oldVal: oldVal ?? '',
+      newVal: newVal ?? '',
+      time: new Date().toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit' })
     });
+    if (log.length > 200) log.length = 200;
+    saveLog(log);
+    renderChangelog();
+  }
 
-    if (title) title.addEventListener('blur', () => {
-      const s = loadState();
-      s[id] = { ...(s[id] || {}), title: title.innerText };
-      saveState(s);
-      persistNewTasks();
-    });
+  function renderChangelog() {
+    const list = document.getElementById('changelogList');
+    if (!list) return;
+    const log = loadLog();
+    if (!log.length) {
+      list.innerHTML = '<div class="changelog-empty">아직 변경 이력이 없습니다.</div>';
+      return;
+    }
+    const badgeMap = {
+      edit:   ['clog-badge-edit',   '수정'],
+      check:  ['clog-badge-check',  '체크'],
+      add:    ['clog-badge-add',    '추가'],
+      delete: ['clog-badge-delete', '삭제']
+    };
+    list.innerHTML = log.map(entry => {
+      const [cls, label] = badgeMap[entry.type] || ['clog-badge-edit', '변경'];
+      const changeHtml = (entry.type === 'check' || entry.type === 'add' || entry.type === 'delete')
+        ? `<div class="clog-new">${entry.newVal}</div>`
+        : `<div class="clog-old">${entry.oldVal || '(비어 있음)'}</div>
+           <div class="clog-arrow">↓</div>
+           <div class="clog-new">${entry.newVal || '(비어 있음)'}</div>`;
+      return `
+        <div class="changelog-entry">
+          <div class="clog-time">${entry.time}</div>
+          <span class="clog-badge ${cls}">${label}</span>
+          <div class="clog-context">${entry.context}</div>
+          <div>${changeHtml}</div>
+        </div>`;
+    }).join('');
+  }
 
-    if (detail) detail.addEventListener('blur', () => {
-      const s = loadState();
-      s[id] = { ...(s[id] || {}), detail: detail.innerText };
-      saveState(s);
-      persistNewTasks();
-    });
+  /* ── hamburger drawer ── */
+  function initDrawer() {
+    const btn      = document.getElementById('hamburgerBtn');
+    const drawer   = document.getElementById('changelogDrawer');
+    const overlay  = document.getElementById('drawerOverlay');
+    const closeBtn = document.getElementById('drawerClose');
+    const clearBtn = document.getElementById('drawerClearBtn');
 
-    delBtn.addEventListener('click', () => {
-      const s = loadState();
-      delete s[id];
-      saveState(s);
-      item.remove();
-      persistNewTasks();
+    function openDrawer()  { drawer.classList.add('open'); overlay.classList.add('show'); btn.classList.add('active'); renderChangelog(); }
+    function closeDrawer() { drawer.classList.remove('open'); overlay.classList.remove('show'); btn.classList.remove('active'); }
+
+    btn.addEventListener('click', () => drawer.classList.contains('open') ? closeDrawer() : openDrawer());
+    closeBtn.addEventListener('click', closeDrawer);
+    overlay.addEventListener('click', closeDrawer);
+    clearBtn.addEventListener('click', () => {
+      if (confirm('변경 이력을 모두 삭제할까요?')) { saveLog([]); renderChangelog(); }
     });
   }
 
+  /* ── persist new tasks ── */
   function persistNewTasks() {
     const lists = document.querySelectorAll('.actions-grid .task-list');
     const arr = [];
@@ -1409,10 +1613,10 @@
         const dl     = item.querySelector('.task-deadline');
         arr.push({
           listIdx,
-          id:       item.dataset.taskId,
-          deadline: dl     ? dl.innerText     : '',
-          title:    title  ? title.innerText  : '',
-          detail:   detail ? detail.innerText : '',
+          id:        item.dataset.taskId,
+          deadline:  dl     ? dl.innerText     : '',
+          title:     title  ? title.innerText  : '',
+          detail:    detail ? detail.innerText : '',
           completed: item.classList.contains('completed')
         });
       });
@@ -1420,89 +1624,138 @@
     saveNew(arr);
   }
 
+  /* ── attach events ── */
+  function attachItemEvents(item, listIdx) {
+    const id       = item.dataset.taskId;
+    const checkbox = item.querySelector('.task-checkbox');
+    const title    = item.querySelector('.task-title');
+    const detail   = item.querySelector('.task-detail');
+    const delBtn   = item.querySelector('.task-delete-btn');
+
+    let prevTitle  = title  ? title.innerText  : '';
+    let prevDetail = detail ? detail.innerText : '';
+
+    if (title) {
+      title.addEventListener('focus', () => { prevTitle = title.innerText; });
+      title.addEventListener('blur', () => {
+        const next = title.innerText.trim();
+        if (next !== prevTitle.trim()) {
+          const person = getPersonName(item);
+          addLog('edit', person + ' · 제목', prevTitle, next);
+          const s = loadState(); s[id] = { ...(s[id]||{}), title: next }; saveState(s);
+          persistNewTasks();
+        }
+      });
+    }
+
+    if (detail) {
+      detail.addEventListener('focus', () => { prevDetail = detail.innerText; });
+      detail.addEventListener('blur', () => {
+        const next = detail.innerText.trim();
+        if (next !== prevDetail.trim()) {
+          const person = getPersonName(item);
+          addLog('edit', person + ' · 상세내용', prevDetail, next);
+          const s = loadState(); s[id] = { ...(s[id]||{}), detail: next }; saveState(s);
+          persistNewTasks();
+        }
+      });
+    }
+
+    checkbox.addEventListener('click', () => {
+      const done = item.classList.toggle('completed');
+      checkbox.classList.toggle('checked', done);
+      const person = getPersonName(item);
+      const taskTitle = title ? title.innerText : id;
+      addLog('check', person + ' · 체크박스', null, done ? '✅ 완료: "' + taskTitle + '"' : '↩ 미완료로 변경: "' + taskTitle + '"');
+      const s = loadState(); s[id] = { ...(s[id]||{}), completed: done }; saveState(s);
+    });
+
+    delBtn.addEventListener('click', () => {
+      const person = getPersonName(item);
+      const taskTitle = title ? title.innerText : id;
+      addLog('delete', person + ' · 과업 삭제', null, '"' + taskTitle + '" 삭제됨');
+      const s = loadState(); delete s[id]; saveState(s);
+      item.remove();
+      persistNewTasks();
+    });
+  }
+
+  /* ── create new task item ── */
   function createNewItem(listIdx, id, deadline, titleText, detailText, done) {
     const item = document.createElement('div');
     item.className = 'task-item';
     item.dataset.taskId = id;
     item.dataset.new = 'true';
-    item.innerHTML = `
-      <div class="task-checkbox${done ? ' checked' : ''}"></div>
-      <div class="task-deadline deadline-normal" contenteditable="true">${deadline}</div>
-      <div class="task-content">
-        <div class="task-title" contenteditable="true">${titleText}</div>
-        <div class="task-detail" contenteditable="true">${detailText}</div>
-      </div>
-      <button class="task-delete-btn" title="삭제">×</button>`;
+    item.innerHTML =
+      '<div class="task-checkbox' + (done ? ' checked' : '') + '"></div>' +
+      '<div class="task-deadline deadline-normal" contenteditable="true">' + deadline + '</div>' +
+      '<div class="task-content">' +
+        '<div class="task-title" contenteditable="true">' + titleText + '</div>' +
+        '<div class="task-detail" contenteditable="true">' + detailText + '</div>' +
+      '</div>' +
+      '<button class="task-delete-btn" title="삭제">×</button>';
     if (done) item.classList.add('completed');
     attachItemEvents(item, listIdx);
     return item;
   }
 
+  /* ── init ── */
   function initTasks() {
     const state = loadState();
     const lists = document.querySelectorAll('.actions-grid .task-list');
 
     lists.forEach((list, listIdx) => {
-      // 기존 task-item 초기화
       list.querySelectorAll('.task-item').forEach((item, taskIdx) => {
-        const id = `task-${listIdx}-${taskIdx}`;
+        const id = 'task-' + listIdx + '-' + taskIdx;
         item.dataset.taskId = id;
 
-        // 체크박스 추가
         const checkbox = document.createElement('div');
         checkbox.className = 'task-checkbox';
         item.insertBefore(checkbox, item.firstChild);
 
-        // 삭제 버튼 추가
         const delBtn = document.createElement('button');
         delBtn.className = 'task-delete-btn';
         delBtn.title = '삭제';
         delBtn.textContent = '×';
         item.appendChild(delBtn);
 
-        // contenteditable
         const title  = item.querySelector('.task-title');
         const detail = item.querySelector('.task-detail');
         if (title)  title.contentEditable  = 'true';
         if (detail) detail.contentEditable = 'true';
 
-        // 저장된 상태 복원
         const saved = state[id];
-        if (saved?.completed) {
-          item.classList.add('completed');
-          checkbox.classList.add('checked');
-        }
-        if (saved?.title  && title)  title.innerText  = saved.title;
-        if (saved?.detail && detail) detail.innerText = saved.detail;
+        if (saved && saved.completed) { item.classList.add('completed'); checkbox.classList.add('checked'); }
+        if (saved && saved.title  && title)  title.innerText  = saved.title;
+        if (saved && saved.detail && detail) detail.innerText = saved.detail;
 
         attachItemEvents(item, listIdx);
       });
 
-      // 저장된 새 과업 복원
-      const savedNew = loadNew().filter(t => t.listIdx === listIdx);
-      savedNew.forEach(t => {
-        const item = createNewItem(listIdx, t.id, t.deadline, t.title, t.detail, t.completed);
-        list.appendChild(item);
+      loadNew().filter(function(t){ return t.listIdx === listIdx; }).forEach(function(t) {
+        list.appendChild(createNewItem(listIdx, t.id, t.deadline, t.title, t.detail, t.completed));
       });
 
-      // + 과업 추가 버튼
       const addBtn = document.createElement('button');
       addBtn.className = 'add-task-btn';
       addBtn.textContent = '+ 과업 추가';
       list.appendChild(addBtn);
 
       addBtn.addEventListener('click', () => {
-        const id   = `new-${listIdx}-${Date.now()}`;
+        const id   = 'new-' + listIdx + '-' + Date.now();
         const item = createNewItem(listIdx, id, '기간', '새 과업 제목', '상세 내용을 입력하세요', false);
         list.insertBefore(item, addBtn);
         persistNewTasks();
-
-        // 제목 자동 선택
+        const person = getPersonName(item);
+        addLog('add', person + ' · 새 과업 추가', null, '새 과업이 추가되었습니다');
         const title = item.querySelector('.task-title');
         title.focus();
         document.execCommand('selectAll', false, null);
       });
     });
+
+    initDrawer();
+    renderChangelog();
   }
 
   document.addEventListener('DOMContentLoaded', initTasks);
