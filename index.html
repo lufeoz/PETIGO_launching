@@ -499,10 +499,16 @@
 
   /* ───── PRODUCT PRIORITY ───── */
   .products-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 14px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
     margin-bottom: 36px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .products-grid .product-card {
+    flex: 1;
+    min-width: 130px;
   }
 
   .product-card {
@@ -737,7 +743,7 @@
   @media (max-width: 768px) {
     .stats-row { grid-template-columns: repeat(2, 1fr); }
     .actions-grid { grid-template-columns: 1fr; }
-    .products-grid { grid-template-columns: repeat(2, 1fr); }
+    .products-grid { flex-wrap: nowrap; }
     .strategy-grid { grid-template-columns: 1fr; }
     body { padding: 20px 16px 48px; }
     .header-left { flex-wrap: wrap; gap: 12px; }
@@ -1027,6 +1033,110 @@
     </div>
   </div>
 
+</div>
+
+<!-- ─── PRODUCT PRIORITY ─── -->
+<div class="section-title">PRODUCT PRIORITY — 1차 제품 8종 (회의 반영 우선순위)</div>
+<div class="products-grid">
+  <div class="product-card">
+    <div class="product-priority priority-1">1</div>
+    <div class="product-info">
+      <div class="product-name">PETIGO 패딩</div>
+      <div class="product-tags">
+        <span class="product-tag hot">F/W 핵심</span>
+        <span class="product-tag">3~4만원</span>
+        <span class="product-tag">누빔선 없는 매끈한 디자인</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-card">
+    <div class="product-priority priority-1">2</div>
+    <div class="product-info">
+      <div class="product-name">경량 패딩</div>
+      <div class="product-tags">
+        <span class="product-tag hot">F/W 핵심</span>
+        <span class="product-tag">2.5~3만원</span>
+        <span class="product-tag">레이어링 활용</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-card">
+    <div class="product-priority priority-1">3</div>
+    <div class="product-info">
+      <div class="product-name">후리스 (조끼형)</div>
+      <div class="product-tags">
+        <span class="product-tag hot">F/W 핵심</span>
+        <span class="product-tag">2.5~3.5만원</span>
+        <span class="product-tag">팔 없는 베스트형</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-card">
+    <div class="product-priority priority-2">4</div>
+    <div class="product-info">
+      <div class="product-name">X형 하네스</div>
+      <div class="product-tags">
+        <span class="product-tag">기어</span>
+        <span class="product-tag">2~3만원</span>
+        <span class="product-tag">코팅 알루미늄 버클</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-card">
+    <div class="product-priority priority-2">5</div>
+    <div class="product-info">
+      <div class="product-name">포켓 하네스</div>
+      <div class="product-tags">
+        <span class="product-tag">기어</span>
+        <span class="product-tag">2.5~3.5만원</span>
+        <span class="product-tag">포켓 내장</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-card">
+    <div class="product-priority priority-2">6</div>
+    <div class="product-info">
+      <div class="product-name">L형 하네스 (조끼형)</div>
+      <div class="product-tags">
+        <span class="product-tag">기어</span>
+        <span class="product-tag">2.5~3.5만원</span>
+        <span class="product-tag">착용 편의</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-card">
+    <div class="product-priority priority-3">7</div>
+    <div class="product-info">
+      <div class="product-name">리드줄</div>
+      <div class="product-tags">
+        <span class="product-tag">기어</span>
+        <span class="product-tag">1~2만원</span>
+        <span class="product-tag hot">사이즈 無 → 빠른 현금화</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-card">
+    <div class="product-priority priority-3">8</div>
+    <div class="product-info">
+      <div class="product-name">산책 파우치</div>
+      <div class="product-tags">
+        <span class="product-tag">기어</span>
+        <span class="product-tag">1.5~2.5만원</span>
+        <span class="product-tag hot">사이즈 無 → 빠른 현금화</span>
+      </div>
+    </div>
+  </div>
+  <div class="product-card">
+    <div class="product-priority priority-4">+</div>
+    <div class="product-info">
+      <div class="product-name">티셔츠</div>
+      <div class="product-tags">
+        <span class="product-tag">어패럴</span>
+        <span class="product-tag">1.5~2.5만원</span>
+        <span class="product-tag">세트 C 구성</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ─── ROADMAP TABLE ─── -->
@@ -1353,110 +1463,6 @@
       <div class="milestone-check">🚀</div>
       <div class="milestone-date">10~11월</div>
       <div class="milestone-name">PETIGO<br>공식 론칭</div>
-    </div>
-  </div>
-</div>
-
-<!-- ─── PRODUCT PRIORITY ─── -->
-<div class="section-title">PRODUCT PRIORITY — 1차 제품 8종 (회의 반영 우선순위)</div>
-<div class="products-grid">
-  <div class="product-card">
-    <div class="product-priority priority-1">1</div>
-    <div class="product-info">
-      <div class="product-name">PETIGO 패딩</div>
-      <div class="product-tags">
-        <span class="product-tag hot">F/W 핵심</span>
-        <span class="product-tag">3~4만원</span>
-        <span class="product-tag">누빔선 없는 매끈한 디자인</span>
-      </div>
-    </div>
-  </div>
-  <div class="product-card">
-    <div class="product-priority priority-1">2</div>
-    <div class="product-info">
-      <div class="product-name">경량 패딩</div>
-      <div class="product-tags">
-        <span class="product-tag hot">F/W 핵심</span>
-        <span class="product-tag">2.5~3만원</span>
-        <span class="product-tag">레이어링 활용</span>
-      </div>
-    </div>
-  </div>
-  <div class="product-card">
-    <div class="product-priority priority-1">3</div>
-    <div class="product-info">
-      <div class="product-name">후리스 (조끼형)</div>
-      <div class="product-tags">
-        <span class="product-tag hot">F/W 핵심</span>
-        <span class="product-tag">2.5~3.5만원</span>
-        <span class="product-tag">팔 없는 베스트형</span>
-      </div>
-    </div>
-  </div>
-  <div class="product-card">
-    <div class="product-priority priority-2">4</div>
-    <div class="product-info">
-      <div class="product-name">X형 하네스</div>
-      <div class="product-tags">
-        <span class="product-tag">기어</span>
-        <span class="product-tag">2~3만원</span>
-        <span class="product-tag">코팅 알루미늄 버클</span>
-      </div>
-    </div>
-  </div>
-  <div class="product-card">
-    <div class="product-priority priority-2">5</div>
-    <div class="product-info">
-      <div class="product-name">포켓 하네스</div>
-      <div class="product-tags">
-        <span class="product-tag">기어</span>
-        <span class="product-tag">2.5~3.5만원</span>
-        <span class="product-tag">포켓 내장</span>
-      </div>
-    </div>
-  </div>
-  <div class="product-card">
-    <div class="product-priority priority-2">6</div>
-    <div class="product-info">
-      <div class="product-name">L형 하네스 (조끼형)</div>
-      <div class="product-tags">
-        <span class="product-tag">기어</span>
-        <span class="product-tag">2.5~3.5만원</span>
-        <span class="product-tag">착용 편의</span>
-      </div>
-    </div>
-  </div>
-  <div class="product-card">
-    <div class="product-priority priority-3">7</div>
-    <div class="product-info">
-      <div class="product-name">리드줄</div>
-      <div class="product-tags">
-        <span class="product-tag">기어</span>
-        <span class="product-tag">1~2만원</span>
-        <span class="product-tag hot">사이즈 無 → 빠른 현금화</span>
-      </div>
-    </div>
-  </div>
-  <div class="product-card">
-    <div class="product-priority priority-3">8</div>
-    <div class="product-info">
-      <div class="product-name">산책 파우치</div>
-      <div class="product-tags">
-        <span class="product-tag">기어</span>
-        <span class="product-tag">1.5~2.5만원</span>
-        <span class="product-tag hot">사이즈 無 → 빠른 현금화</span>
-      </div>
-    </div>
-  </div>
-  <div class="product-card">
-    <div class="product-priority priority-4">+</div>
-    <div class="product-info">
-      <div class="product-name">티셔츠</div>
-      <div class="product-tags">
-        <span class="product-tag">어패럴</span>
-        <span class="product-tag">1.5~2.5만원</span>
-        <span class="product-tag">세트 C 구성</span>
-      </div>
     </div>
   </div>
 </div>
