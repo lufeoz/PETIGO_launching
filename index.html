@@ -21,6 +21,12 @@
     --yellow: #FFD60A;
     --red: #FF3B30;
     --blue: #0A84FF;
+    --pink: #FF6B9D;
+
+    /* 담당자 색상 */
+    --color-jeon: #FF6B9D;   /* 전실장 — 분홍 */
+    --color-yoo:  #34C759;   /* 유실장 — 초록 */
+    --color-ceo:  #0A84FF;   /* 대표님 — 파랑 */
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -225,7 +231,7 @@
   }
 
   .critical-label {
-    font-size: 10px; font-weight: 700; color: var(--orange);
+    font-size: 10px; font-weight: 700; color: var(--grey);
     letter-spacing: 2px; margin-bottom: 12px;
   }
 
@@ -258,7 +264,7 @@
 
   /* ───── SECTION TITLE ───── */
   .section-title {
-    font-size: 11px; font-weight: 700; color: var(--orange);
+    font-size: 11px; font-weight: 700; color: var(--grey);
     letter-spacing: 2px; margin-bottom: 16px;
   }
 
@@ -308,12 +314,21 @@
     font-size: 14px; font-weight: 700; flex-shrink: 0;
   }
 
-  .avatar-designer { background: rgba(10,132,255,0.2); color: #0A84FF; }
-  .avatar-marketer { background: rgba(255,107,26,0.2); color: var(--orange); }
-  .avatar-ceo { background: rgba(52,199,89,0.2); color: var(--green); }
+  .avatar-designer { background: rgba(255,107,157,0.2); color: var(--color-jeon); }
+  .avatar-marketer { background: rgba(52,199,89,0.2);  color: var(--color-yoo); }
+  .avatar-ceo      { background: rgba(10,132,255,0.2); color: var(--color-ceo); }
 
-  .person-name { font-size: 15px; font-weight: 700; }
-  .person-role { font-size: 11px; color: var(--grey); margin-top: 2px; }
+  .person-name { font-size: 15px; font-weight: 700; color: var(--grey); }
+  .person-role { font-size: 11px; color: var(--grey-2); margin-top: 2px; }
+
+  /* 담당자별 카드 상단 강조선 */
+  .person-card-jeon { border-top: 3px solid var(--color-jeon); }
+  .person-card-yoo  { border-top: 3px solid var(--color-yoo); }
+  .person-card-ceo  { border-top: 3px solid var(--color-ceo); }
+
+  .person-card-jeon .person-name { color: var(--color-jeon); }
+  .person-card-yoo  .person-name { color: var(--color-yoo); }
+  .person-card-ceo  .person-name { color: var(--color-ceo); }
 
   .task-list { padding: 16px 20px; }
 
@@ -352,8 +367,8 @@
   }
 
   .task-content { flex: 1; }
-  .task-title { font-size: 13px; font-weight: 600; line-height: 1.4; }
-  .task-detail { font-size: 11px; color: var(--grey); margin-top: 3px; line-height: 1.5; }
+  .task-title { font-size: 13px; font-weight: 600; line-height: 1.4; color: var(--grey); }
+  .task-detail { font-size: 11px; color: var(--white); margin-top: 3px; line-height: 1.5; }
 
   /* ───── ROADMAP ───── */
   .roadmap-wrap {
@@ -408,11 +423,11 @@
     white-space: nowrap;
   }
 
-  .bar-designer { background: rgba(10,132,255,0.3); color: #4DA3FF; border: 1px solid rgba(10,132,255,0.4); }
-  .bar-marketer { background: rgba(255,107,26,0.3); color: #FF9A5C; border: 1px solid rgba(255,107,26,0.4); }
-  .bar-production { background: rgba(52,199,89,0.3); color: #5EDD7A; border: 1px solid rgba(52,199,89,0.4); }
-  .bar-all { background: rgba(255,214,10,0.3); color: #FFE066; border: 1px solid rgba(255,214,10,0.4); }
-  .bar-done { background: rgba(52,199,89,0.15); color: var(--green); border: 1px solid rgba(52,199,89,0.3); }
+  .bar-designer   { background: rgba(255,107,157,0.25); color: var(--color-jeon); border: 1px solid rgba(255,107,157,0.4); }
+  .bar-marketer   { background: rgba(52,199,89,0.25);  color: var(--color-yoo);  border: 1px solid rgba(52,199,89,0.4); }
+  .bar-production { background: rgba(10,132,255,0.25); color: var(--color-ceo);  border: 1px solid rgba(10,132,255,0.4); }
+  .bar-all  { background: rgba(255,255,255,0.08); color: var(--grey); border: 1px solid rgba(255,255,255,0.15); }
+  .bar-done { background: rgba(52,199,89,0.15);   color: var(--green); border: 1px solid rgba(52,199,89,0.3); }
 
   .cat-label {
     display: inline-block;
@@ -421,10 +436,10 @@
     margin-right: 4px;
   }
 
-  .cat-designer { background: rgba(10,132,255,0.15); color: #4DA3FF; }
-  .cat-marketer { background: rgba(255,107,26,0.15); color: #FF9A5C; }
-  .cat-production { background: rgba(52,199,89,0.15); color: #5EDD7A; }
-  .cat-all { background: rgba(255,214,10,0.15); color: #FFE066; }
+  .cat-designer   { background: rgba(255,107,157,0.15); color: var(--color-jeon); }
+  .cat-marketer   { background: rgba(52,199,89,0.15);   color: var(--color-yoo); }
+  .cat-production { background: rgba(10,132,255,0.15);  color: var(--color-ceo); }
+  .cat-all { background: rgba(255,255,255,0.08); color: var(--grey); }
 
   /* ───── MILESTONES ───── */
   .milestones-wrap {
@@ -457,13 +472,13 @@
 
   .milestone-date {
     font-size: 11px; font-weight: 700;
-    color: var(--orange); margin-bottom: 6px;
+    color: var(--grey); margin-bottom: 6px;
   }
 
   .milestone-date.past-date { color: var(--green); }
 
   .milestone-name {
-    font-size: 12px; font-weight: 600; color: var(--white);
+    font-size: 12px; font-weight: 600; color: var(--grey);
     line-height: 1.4;
   }
 
@@ -499,7 +514,7 @@
   .priority-4 { background: rgba(142,142,147,0.2); color: var(--grey); }
 
   .product-info { flex: 1; }
-  .product-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .product-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--grey); }
   .product-tags { display: flex; gap: 6px; flex-wrap: wrap; }
   .product-tag {
     font-size: 10px; color: var(--grey);
@@ -525,18 +540,19 @@
 
   .strategy-title {
     font-size: 13px; font-weight: 700;
-    color: var(--orange); margin-bottom: 12px;
+    color: var(--grey); margin-bottom: 12px;
     display: flex; align-items: center; gap: 8px;
   }
 
   .strategy-item {
     display: flex; align-items: flex-start; gap: 8px;
     margin-bottom: 8px; font-size: 12.5px; line-height: 1.5;
+    color: var(--white);
   }
 
   .strategy-dot {
     width: 5px; height: 5px; border-radius: 50%;
-    background: var(--orange); flex-shrink: 0; margin-top: 6px;
+    background: var(--grey-2); flex-shrink: 0; margin-top: 6px;
   }
 
   /* ───── LEGEND ───── */
@@ -879,7 +895,7 @@
 <div class="actions-grid">
 
   <!-- 전실장 -->
-  <div class="person-card">
+  <div class="person-card person-card-jeon">
     <div class="person-header">
       <div class="person-avatar avatar-designer">전</div>
       <div>
@@ -948,7 +964,7 @@
   </div>
 
   <!-- 유실장 -->
-  <div class="person-card">
+  <div class="person-card person-card-yoo">
     <div class="person-header">
       <div class="person-avatar avatar-marketer">유</div>
       <div>
@@ -1017,7 +1033,7 @@
   </div>
 
   <!-- 대표님 -->
-  <div class="person-card">
+  <div class="person-card person-card-ceo">
     <div class="person-header">
       <div class="person-avatar avatar-ceo">대</div>
       <div>
@@ -1424,10 +1440,10 @@
   </table>
 
   <div class="legend-row">
-    <div class="legend-item"><div class="legend-dot" style="background:#4DA3FF;"></div>전실장 (디자이너)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#FF9A5C;"></div>유실장 (마케터)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#5EDD7A;"></div>생산팀 (미얀마·중국)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#FFE066;"></div>전체 공동</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#FF6B9D;"></div>전실장 (디자이너)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34C759;"></div>유실장 (마케터)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0A84FF;"></div>생산팀 (미얀마·중국)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8E8E93;"></div>전체 공동</div>
     <div class="legend-item"><div class="legend-dot" style="background:#34C759;"></div>완료</div>
   </div>
 </div>
