@@ -985,9 +985,49 @@
   .pm-editor img {
     max-width: 100%; border-radius: 10px;
     margin: 12px 0; display: block;
-    cursor: zoom-in; transition: opacity 0.15s;
+    cursor: pointer; transition: opacity 0.15s;
   }
   .pm-editor img:hover { opacity: 0.85; }
+  /* 이미지 래퍼 (선택 시) */
+  .pm-img-wrap {
+    position: relative; display: inline-block;
+    margin: 12px 0; max-width: 100%;
+    user-select: none;
+  }
+  .pm-img-wrap img {
+    display: block; border-radius: 10px;
+    margin: 0; cursor: pointer;
+  }
+  .pm-img-wrap.selected {
+    outline: 2px solid rgba(255,255,255,0.5);
+    outline-offset: 3px;
+    border-radius: 12px;
+  }
+  .pm-img-toolbar {
+    display: none; position: absolute; top: -36px; left: 50%;
+    transform: translateX(-50%);
+    background: var(--charcoal-2); border: 1px solid var(--charcoal-3);
+    border-radius: 8px; padding: 4px 6px;
+    gap: 4px; z-index: 10; white-space: nowrap;
+  }
+  .pm-img-wrap.selected .pm-img-toolbar { display: flex; }
+  .pm-img-toolbar button {
+    background: var(--charcoal-3); border: none; color: var(--white);
+    font-size: 11px; padding: 4px 10px; border-radius: 6px;
+    cursor: pointer; font-family: 'Noto Sans KR','Inter',sans-serif;
+    transition: background 0.15s;
+  }
+  .pm-img-toolbar button:hover { background: rgba(255,255,255,0.2); }
+  .pm-img-toolbar button.pm-img-del { color: #FF3B30; }
+  .pm-img-toolbar button.pm-img-del:hover { background: rgba(255,59,48,0.2); }
+  /* 리사이즈 핸들 */
+  .pm-img-resize {
+    display: none; position: absolute; bottom: -5px; right: -5px;
+    width: 14px; height: 14px;
+    background: var(--white); border: 2px solid var(--charcoal);
+    border-radius: 3px; cursor: nwse-resize; z-index: 10;
+  }
+  .pm-img-wrap.selected .pm-img-resize { display: block; }
   .pm-editor h1, .pm-editor h2, .pm-editor h3 {
     color: var(--white); font-weight: 800; margin: 16px 0 8px;
   }
@@ -1964,20 +2004,143 @@ document.addEventListener('DOMContentLoaded', function () {
   /* ── 에디터 이벤트 ── */
   editor.addEventListener('input', scheduleSave);
 
-  /* 이미지 클릭 줌 */
-  function bindEditorImages() {
-    editor.querySelectorAll('img').forEach(function(img) {
-      if (img.dataset.zoomBound) return;
-      img.dataset.zoomBound = '1';
-      img.addEventListener('click', function(e) {
-        e.preventDefault();
-        zoomImg.src = img.src;
-        zoomOv.classList.add('open');
+  /* ── 이미지 컨트롤 시스템 ── */
+  var activeWrap = null;
+
+  function wrapImage(img) {
+    if (img.closest('.pm-img-wrap')) return; /* 이미 래핑됨 */
+    var wrap = document.createElement('div');
+    wrap.className = 'pm-img-wrap';
+    wrap.contentEditable = 'false';
+    wrap.innerHTML = '<div class="pm-img-toolbar">'
+      + '<button class="pm-img-size" data-w="25%">S</button>'
+      + '<button class="pm-img-size" data-w="50%">M</button>'
+      + '<button class="pm-img-size" data-w="75%">L</button>'
+      + '<button class="pm-img-size" data-w="100%">XL</button>'
+      + '<button class="pm-img-zoom">\ud83d\udd0d</button>'
+      + '<button class="pm-img-del">\uc0ad\uc81c</button>'
+      + '</div>'
+      + '<div class="pm-img-resize"></div>';
+    img.parentNode.insertBefore(wrap, img);
+    wrap.insertBefore(img, wrap.querySelector('.pm-img-resize'));
+    img.style.width = img.style.width || '100%';
+    img.style.maxWidth = '100%';
+    img.draggable = false;
+    bindWrapEvents(wrap);
+  }
+
+  function bindWrapEvents(wrap) {
+    var img = wrap.querySelector('img');
+    var handle = wrap.querySelector('.pm-img-resize');
+
+    /* 클릭: 선택/해제 */
+    wrap.addEventListener('click', function(e) {
+      e.stopPropagation();
+      if (e.target.tagName === 'BUTTON') return;
+      selectWrap(wrap);
+    });
+
+    /* 사이즈 버튼 */
+    wrap.querySelectorAll('.pm-img-size').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        img.style.width = btn.dataset.w;
+        scheduleSave();
       });
+    });
+
+    /* 줌 */
+    wrap.querySelector('.pm-img-zoom').addEventListener('click', function(e) {
+      e.stopPropagation();
+      zoomImg.src = img.src;
+      zoomOv.classList.add('open');
+    });
+
+    /* 삭제 */
+    wrap.querySelector('.pm-img-del').addEventListener('click', function(e) {
+      e.stopPropagation();
+      wrap.remove();
+      activeWrap = null;
+      scheduleSave();
+    });
+
+    /* 리사이즈 드래그 */
+    handle.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var startX = e.clientX;
+      var startW = img.offsetWidth;
+      function onMove(ev) {
+        var newW = Math.max(60, startW + (ev.clientX - startX));
+        var maxW = editor.offsetWidth - 40;
+        img.style.width = Math.min(newW, maxW) + 'px';
+      }
+      function onUp() {
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        scheduleSave();
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+
+    /* 터치 리사이즈 */
+    handle.addEventListener('touchstart', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var startX = e.touches[0].clientX;
+      var startW = img.offsetWidth;
+      function onMove(ev) {
+        var newW = Math.max(60, startW + (ev.touches[0].clientX - startX));
+        var maxW = editor.offsetWidth - 40;
+        img.style.width = Math.min(newW, maxW) + 'px';
+      }
+      function onEnd() {
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onEnd);
+        scheduleSave();
+      }
+      document.addEventListener('touchmove', onMove, { passive: false });
+      document.addEventListener('touchend', onEnd);
     });
   }
 
-  /* MutationObserver로 새 이미지에 줌 바인딩 */
+  function selectWrap(wrap) {
+    if (activeWrap && activeWrap !== wrap) activeWrap.classList.remove('selected');
+    activeWrap = wrap;
+    wrap.classList.add('selected');
+  }
+
+  /* 에디터 외부 클릭 시 선택 해제 */
+  document.addEventListener('click', function(e) {
+    if (activeWrap && !activeWrap.contains(e.target)) {
+      activeWrap.classList.remove('selected');
+      activeWrap = null;
+    }
+  });
+
+  /* Delete/Backspace로 선택된 이미지 삭제 */
+  document.addEventListener('keydown', function(e) {
+    if (activeWrap && (e.key === 'Delete' || e.key === 'Backspace')) {
+      if (document.activeElement === editor || activeWrap.contains(document.activeElement)) {
+        /* 에디터 내 텍스트 편집 중이 아닐 때만 */
+        if (window.getSelection().isCollapsed || activeWrap.classList.contains('selected')) {
+          e.preventDefault();
+          activeWrap.remove();
+          activeWrap = null;
+          scheduleSave();
+        }
+      }
+    }
+  });
+
+  function bindEditorImages() {
+    editor.querySelectorAll('img').forEach(function(img) {
+      wrapImage(img);
+    });
+  }
+
+  /* MutationObserver로 새 이미지에 래핑 */
   var observer = new MutationObserver(function() { bindEditorImages(); });
 
   /* ── 드래그 앤 드롭 ── */
