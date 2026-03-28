@@ -250,6 +250,9 @@
   .clog-badge-check { background: rgba(52,199,89,0.15); color: var(--green); }
   .clog-badge-add { background: rgba(255,214,10,0.15); color: #FFD60A; }
   .clog-badge-delete { background: rgba(255,59,48,0.15); color: #FF3B30; }
+  .clog-change-row { margin-bottom: 8px; }
+  .clog-change-row:last-child { margin-bottom: 0; }
+  .clog-field { font-size: 10px; font-weight: 700; color: var(--grey-2); letter-spacing: 0.5px; display: block; margin-bottom: 3px; }
 
   /* ───── CRITICAL PATH ───── */
   .critical-banner {
@@ -1347,7 +1350,6 @@
     </div>
     <button class="drawer-close" id="drawerClose">×</button>
   </div>
-  <button class="drawer-clear-btn" id="drawerClearBtn">전체 기록 삭제</button>
   <div class="changelog-list" id="changelogList">
     <div class="changelog-empty">아직 변경 이력이 없습니다.</div>
   </div>
@@ -2287,15 +2289,17 @@ document.addEventListener('DOMContentLoaded', function () {
   const saveLog   = a => localStorage.setItem(LOG_KEY, JSON.stringify(a));
 
   /* ── 변경 이력 ── */
-  function addLog(type, context, oldVal, newVal) {
+  function addLog(type, context, changes, newVal) {
     const log = loadLog();
-    log.unshift({ type, context, oldVal: oldVal ?? '', newVal: newVal ?? '',
-      time: new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit'})
+    log.unshift({ type, context, changes: changes ?? null, newVal: newVal ?? '',
+      time: new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
     });
     if (log.length > 200) log.length = 200;
     saveLog(log);
     renderChangelog();
   }
+
+  function esc2(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function renderChangelog() {
     const list = document.getElementById('changelogList');
@@ -2305,10 +2309,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const badgeMap = { edit:['clog-badge-edit','수정'], check:['clog-badge-check','체크'], add:['clog-badge-add','추가'], delete:['clog-badge-delete','삭제'] };
     list.innerHTML = log.map(e => {
       const [cls, label] = badgeMap[e.type] || ['clog-badge-edit','변경'];
-      const body = (e.type === 'check' || e.type === 'add' || e.type === 'delete')
-        ? `<div class="clog-new">${e.newVal}</div>`
-        : `<div class="clog-old">${e.oldVal||'(비어있음)'}</div><div class="clog-arrow">↓</div><div class="clog-new">${e.newVal||'(비어있음)'}</div>`;
-      return `<div class="changelog-entry"><div class="clog-time">${e.time}</div><span class="clog-badge ${cls}">${label}</span><div class="clog-context">${e.context}</div>${body}</div>`;
+      let body = '';
+      if (e.type === 'edit' && Array.isArray(e.changes)) {
+        // 변경 항목 묶음 표시
+        body = e.changes.map(ch =>
+          `<div class="clog-change-row">`
+          + `<span class="clog-field">${esc2(ch.field)}</span>`
+          + `<div class="clog-old">${esc2(ch.oldVal)||'(비어있음)'}</div>`
+          + `<div class="clog-arrow">↓</div>`
+          + `<div class="clog-new">${esc2(ch.newVal)||'(비어있음)'}</div>`
+          + `</div>`
+        ).join('');
+      } else {
+        body = `<div class="clog-new">${esc2(e.newVal)||esc2(e.oldVal)||''}</div>`;
+      }
+      return `<div class="changelog-entry"><div class="clog-time">${e.time}</div><span class="clog-badge ${cls}">${label}</span><div class="clog-context">${esc2(e.context)}</div>${body}</div>`;
     }).join('');
   }
 
@@ -2318,13 +2333,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const drawer = document.getElementById('changelogDrawer');
     const overlay = document.getElementById('drawerOverlay');
     const closeBtn = document.getElementById('drawerClose');
-    const clearBtn = document.getElementById('drawerClearBtn');
+
     const open  = () => { drawer.classList.add('open'); overlay.classList.add('show'); btn.classList.add('active'); renderChangelog(); };
     const close = () => { drawer.classList.remove('open'); overlay.classList.remove('show'); btn.classList.remove('active'); };
     btn.addEventListener('click', () => drawer.classList.contains('open') ? close() : open());
     closeBtn.addEventListener('click', close);
     overlay.addEventListener('click', close);
-    clearBtn.addEventListener('click', () => { if (confirm('변경 이력을 모두 삭제할까요?')) { saveLog([]); renderChangelog(); } });
   }
 
   /* ── 요약 자동 생성 ── */
@@ -2374,8 +2388,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const state  = loadState();
     const prev   = state[tdCurrentId] || {};
 
-    if (title  !== (prev.title  || '')) addLog('edit', getPersonName(tdCurrentItem) + ' · 제목', prev.title  || '', title);
-    if (detail !== (prev.detail || '')) addLog('edit', getPersonName(tdCurrentItem) + ' · 내용', prev.detail || '', detail);
+    // 변경된 항목을 하나의 로그로 묶어 기록
+    const changes = [];
+    if (title  !== (prev.title  || '')) changes.push({ field: '제목', oldVal: prev.title || '', newVal: title });
+    if (detail !== (prev.detail || '')) changes.push({ field: '내용', oldVal: prev.detail || '', newVal: detail });
+    if (changes.length) {
+      const person = getPersonName(tdCurrentItem);
+      const taskTitle = title || prev.title || '(제목 없음)';
+      addLog('edit', person + ' · ' + taskTitle, changes, null);
+    }
 
     state[tdCurrentId] = { ...prev, title, detail, log, files: tdPendingFiles };
     saveState(state);
