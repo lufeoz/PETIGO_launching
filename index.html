@@ -762,14 +762,29 @@
   /* ── 게시판 전체화면 페이지 ── */
   .pm-page {
     position: fixed; inset: 0;
-    background: var(--charcoal);
+    background: rgba(0,0,0,0.6);
     z-index: 2000;
-    display: flex; flex-direction: column;
-    transform: translateX(100%);
-    transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
-    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
   }
-  .pm-page.open { transform: translateX(0); }
+  .pm-page.open { opacity: 1; pointer-events: all; }
+
+  .pm-page .pm-window {
+    background: var(--charcoal-2);
+    border: 1px solid var(--charcoal-3);
+    border-radius: 18px;
+    width: 100%; max-width: 800px;
+    max-height: 88vh;
+    display: flex; flex-direction: column;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    overflow: hidden;
+    transform: scale(0.95);
+    transition: transform 0.2s ease;
+  }
+  .pm-page.open .pm-window { transform: scale(1); }
 
   .pm-header {
     padding: 16px 24px;
@@ -1812,6 +1827,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   document.getElementById('pmBack').addEventListener('click', closePage);
+  page.addEventListener('click', function(e) { if (e.target === page) closePage(); });
 
   /* ── 사진 업로드 ── */
   fileInput.addEventListener('change', function () {
@@ -2169,24 +2185,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- ─── PRODUCT BOARD PAGE ─── -->
 <div class="pm-page" id="pmPage">
-  <div class="pm-header">
-    <button class="pm-back" id="pmBack">&#8592;</button>
-    <div class="pm-product-name" id="pmProductName"></div>
-    <div class="pm-post-count" id="pmPostCount">0개</div>
-  </div>
-  <div class="pm-body">
-    <div class="pm-form">
-      <textarea class="pm-textarea" id="pmTextarea" placeholder="기록을 남겨주세요 — 디자인 메모, 수정 사항, 피드백 등..."></textarea>
-      <div class="pm-form-row">
-        <label class="pm-img-label">
-          ＋ 사진 추가
-          <input type="file" id="pmFileInput" multiple accept="image/*" style="display:none">
-        </label>
-        <div class="pm-img-previews" id="pmImgPreviews"></div>
-        <button class="pm-submit" id="pmSubmit">등록</button>
-      </div>
+  <div class="pm-window">
+    <div class="pm-header">
+      <button class="pm-back" id="pmBack">&#8592;</button>
+      <div class="pm-product-name" id="pmProductName"></div>
+      <div class="pm-post-count" id="pmPostCount">0개</div>
     </div>
-    <div class="pm-posts" id="pmPosts"></div>
+    <div class="pm-body">
+      <div class="pm-form">
+        <textarea class="pm-textarea" id="pmTextarea" placeholder="기록을 남겨주세요 — 디자인 메모, 수정 사항, 피드백 등..."></textarea>
+        <div class="pm-form-row">
+          <label class="pm-img-label">
+            ＋ 사진 추가
+            <input type="file" id="pmFileInput" multiple accept="image/*" style="display:none">
+          </label>
+          <div class="pm-img-previews" id="pmImgPreviews"></div>
+          <button class="pm-submit" id="pmSubmit">등록</button>
+        </div>
+      </div>
+      <div class="pm-posts" id="pmPosts"></div>
+    </div>
   </div>
 </div>
 
