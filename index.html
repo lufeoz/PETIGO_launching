@@ -730,6 +730,185 @@
     border-color: var(--charcoal-3);
   }
 
+  /* ───── PRODUCT BOARD MODAL ───── */
+  .product-card { cursor: pointer; position: relative; }
+  .product-card::after {
+    content: '▶';
+    position: absolute; bottom: 10px; right: 12px;
+    font-size: 9px; color: var(--grey-2);
+    transition: color 0.15s;
+  }
+  .product-card:hover::after { color: var(--white); }
+
+  .pm-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    padding: 24px;
+  }
+  .pm-overlay.open { display: flex; }
+
+  .pm-modal {
+    background: var(--charcoal-2);
+    border: 1px solid var(--charcoal-3);
+    border-radius: 18px;
+    width: 100%;
+    max-width: 780px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+
+  .pm-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--charcoal-3);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .pm-header-left { display: flex; align-items: center; gap: 12px; }
+  .pm-product-name { font-size: 18px; font-weight: 800; color: var(--white); }
+  .pm-post-count { font-size: 11px; color: var(--grey); background: var(--charcoal-3); padding: 2px 8px; border-radius: 10px; }
+  .pm-close {
+    background: none; border: none; color: var(--grey);
+    font-size: 24px; cursor: pointer; line-height: 1;
+    transition: color 0.15s; padding: 0;
+  }
+  .pm-close:hover { color: var(--white); }
+
+  .pm-body {
+    flex: 1; overflow-y: auto;
+    padding: 20px 24px;
+    display: flex; flex-direction: column; gap: 20px;
+  }
+  .pm-body::-webkit-scrollbar { width: 4px; }
+  .pm-body::-webkit-scrollbar-thumb { background: var(--charcoal-3); border-radius: 2px; }
+
+  /* ── 입력 폼 ── */
+  .pm-form {
+    background: var(--charcoal);
+    border: 1px solid var(--charcoal-3);
+    border-radius: 12px;
+    padding: 16px;
+    flex-shrink: 0;
+  }
+  .pm-textarea {
+    width: 100%; min-height: 80px;
+    background: transparent; border: none; outline: none;
+    color: var(--white); font-size: 13px; line-height: 1.6;
+    resize: vertical; font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  }
+  .pm-textarea::placeholder { color: var(--grey-2); }
+  .pm-form-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 12px; padding-top: 12px;
+    border-top: 1px solid var(--charcoal-3);
+    flex-wrap: wrap;
+  }
+  .pm-img-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--grey); cursor: pointer;
+    padding: 6px 12px; border-radius: 8px;
+    border: 1px solid var(--charcoal-3);
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .pm-img-label:hover { border-color: var(--white); color: var(--white); }
+  .pm-img-previews {
+    display: flex; gap: 8px; flex-wrap: wrap; flex: 1;
+  }
+  .pm-img-thumb {
+    width: 52px; height: 52px; border-radius: 6px;
+    object-fit: cover; border: 1px solid var(--charcoal-3);
+    position: relative;
+  }
+  .pm-img-thumb-wrap {
+    position: relative; width: 52px; height: 52px; flex-shrink: 0;
+  }
+  .pm-img-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+  .pm-img-thumb-del {
+    position: absolute; top: -4px; right: -4px;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #FF3B30; color: white;
+    font-size: 10px; font-weight: 700;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+  .pm-submit {
+    margin-left: auto;
+    padding: 8px 20px;
+    background: var(--white); color: var(--charcoal);
+    border: none; border-radius: 8px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+    transition: opacity 0.15s; white-space: nowrap;
+  }
+  .pm-submit:hover { opacity: 0.85; }
+
+  /* ── 게시글 목록 ── */
+  .pm-posts { display: flex; flex-direction: column; gap: 14px; }
+  .pm-empty { text-align: center; color: var(--grey); font-size: 12px; padding: 32px 0; }
+
+  .pm-post {
+    background: var(--charcoal);
+    border: 1px solid var(--charcoal-3);
+    border-radius: 12px;
+    padding: 16px;
+    transition: border-color 0.15s;
+  }
+  .pm-post:hover { border-color: rgba(255,255,255,0.2); }
+
+  .pm-post-meta {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .pm-post-time { font-size: 11px; color: var(--grey-2); }
+  .pm-post-del {
+    background: none; border: none; color: var(--grey-2);
+    font-size: 13px; cursor: pointer; transition: color 0.15s; padding: 0;
+  }
+  .pm-post-del:hover { color: #FF3B30; }
+
+  .pm-post-text {
+    font-size: 13px; color: var(--white);
+    line-height: 1.7; white-space: pre-wrap;
+    margin-bottom: 10px;
+  }
+  .pm-post-text:empty { display: none; }
+
+  .pm-post-imgs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .pm-post-imgs img {
+    width: 100%; aspect-ratio: 1;
+    object-fit: cover; border-radius: 8px;
+    border: 1px solid var(--charcoal-3);
+    cursor: zoom-in;
+    transition: opacity 0.15s;
+  }
+  .pm-post-imgs img:hover { opacity: 0.85; }
+
+  /* ── 이미지 전체화면 ── */
+  .pm-zoom-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 3000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+  .pm-zoom-overlay.open { display: flex; }
+  .pm-zoom-overlay img { max-width: 90vw; max-height: 90vh; border-radius: 8px; }
+
   /* ───── FOOTER ───── */
   .footer {
     text-align: center;
@@ -1543,6 +1722,166 @@
   </div>
 </div>
 
+<!-- ─── SCRIPT: PRODUCT BOARD ─── -->
+<script>
+(function () {
+  const BOARD_KEY = 'petigo_product_board';
+
+  function loadBoard() { try { return JSON.parse(localStorage.getItem(BOARD_KEY)) || {}; } catch { return {}; } }
+  function saveBoard(b) { localStorage.setItem(BOARD_KEY, JSON.stringify(b)); }
+
+  let currentProduct = null;
+  let pendingImgs = []; // { dataUrl, name }
+
+  const overlay   = document.getElementById('pmOverlay');
+  const nameEl    = document.getElementById('pmProductName');
+  const countEl   = document.getElementById('pmPostCount');
+  const textarea  = document.getElementById('pmTextarea');
+  const fileInput = document.getElementById('pmFileInput');
+  const previews  = document.getElementById('pmImgPreviews');
+  const submitBtn = document.getElementById('pmSubmit');
+  const postsEl   = document.getElementById('pmPosts');
+  const zoomOv    = document.getElementById('pmZoomOverlay');
+  const zoomImg   = document.getElementById('pmZoomImg');
+
+  /* ── open / close ── */
+  function openModal(productName) {
+    currentProduct = productName;
+    pendingImgs = [];
+    previews.innerHTML = '';
+    textarea.value = '';
+    nameEl.textContent = productName;
+    renderPosts();
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    textarea.focus();
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+    currentProduct = null;
+  }
+
+  document.getElementById('pmClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+
+  /* ── image upload ── */
+  fileInput.addEventListener('change', () => {
+    Array.from(fileInput.files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = e => {
+        pendingImgs.push({ dataUrl: e.target.result, name: file.name });
+        renderPreview();
+      };
+      reader.readAsDataURL(file);
+    });
+    fileInput.value = '';
+  });
+
+  function renderPreview() {
+    previews.innerHTML = '';
+    pendingImgs.forEach((img, i) => {
+      const wrap = document.createElement('div');
+      wrap.className = 'pm-img-thumb-wrap';
+      const im = document.createElement('img');
+      im.src = img.dataUrl;
+      const del = document.createElement('button');
+      del.className = 'pm-img-thumb-del';
+      del.textContent = '×';
+      del.addEventListener('click', () => { pendingImgs.splice(i, 1); renderPreview(); });
+      wrap.appendChild(im);
+      wrap.appendChild(del);
+      previews.appendChild(wrap);
+    });
+  }
+
+  /* ── submit ── */
+  submitBtn.addEventListener('click', () => {
+    const text = textarea.value.trim();
+    if (!text && pendingImgs.length === 0) return;
+
+    const board = loadBoard();
+    if (!board[currentProduct]) board[currentProduct] = [];
+
+    board[currentProduct].unshift({
+      id: Date.now(),
+      time: new Date().toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }),
+      text,
+      imgs: pendingImgs.map(p => p.dataUrl)
+    });
+
+    saveBoard(board);
+    textarea.value = '';
+    pendingImgs = [];
+    previews.innerHTML = '';
+    renderPosts();
+  });
+
+  /* ── render posts ── */
+  function renderPosts() {
+    const board = loadBoard();
+    const posts = board[currentProduct] || [];
+    countEl.textContent = posts.length + '개';
+
+    if (!posts.length) {
+      postsEl.innerHTML = '<div class="pm-empty">아직 기록이 없습니다.<br>첫 번째 기록을 남겨보세요.</div>';
+      return;
+    }
+
+    postsEl.innerHTML = posts.map((post, i) => `
+      <div class="pm-post" data-idx="${i}">
+        <div class="pm-post-meta">
+          <span class="pm-post-time">${post.time}</span>
+          <button class="pm-post-del" data-idx="${i}">삭제</button>
+        </div>
+        ${post.text ? `<div class="pm-post-text">${escHtml(post.text)}</div>` : ''}
+        ${post.imgs && post.imgs.length ? `
+          <div class="pm-post-imgs">
+            ${post.imgs.map(src => `<img src="${src}" alt="" data-zoom="${src}">`).join('')}
+          </div>` : ''}
+      </div>`).join('');
+
+    // 삭제 버튼 이벤트
+    postsEl.querySelectorAll('.pm-post-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx);
+        const board = loadBoard();
+        board[currentProduct].splice(idx, 1);
+        saveBoard(board);
+        renderPosts();
+      });
+    });
+
+    // 이미지 줌
+    postsEl.querySelectorAll('[data-zoom]').forEach(img => {
+      img.addEventListener('click', () => {
+        zoomImg.src = img.dataset.zoom;
+        zoomOv.classList.add('open');
+      });
+    });
+  }
+
+  // 이미지 줌 닫기
+  zoomOv.addEventListener('click', () => { zoomOv.classList.remove('open'); zoomImg.src = ''; });
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  }
+
+  /* ── 카드 클릭 이벤트 ── */
+  function initProductCards() {
+    document.querySelectorAll('.products-grid .product-card').forEach(card => {
+      const name = card.querySelector('.product-name').textContent.trim();
+      card.dataset.product = name;
+      card.addEventListener('click', () => openModal(name));
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', initProductCards);
+})();
+</script>
+
 <!-- ─── SCRIPT: EDITABLE NEXT ACTIONS + CHANGELOG ─── -->
 <script>
 (function () {
@@ -1787,6 +2126,37 @@
   document.addEventListener('DOMContentLoaded', initTasks);
 })();
 </script>
+
+<!-- ─── PRODUCT BOARD MODAL ─── -->
+<div class="pm-overlay" id="pmOverlay">
+  <div class="pm-modal" id="pmModal">
+    <div class="pm-header">
+      <div class="pm-header-left">
+        <div class="pm-product-name" id="pmProductName"></div>
+        <div class="pm-post-count" id="pmPostCount">0개</div>
+      </div>
+      <button class="pm-close" id="pmClose">×</button>
+    </div>
+    <div class="pm-body">
+      <div class="pm-form">
+        <textarea class="pm-textarea" id="pmTextarea" placeholder="기록을 남겨주세요 — 디자인 메모, 수정 사항, 피드백 등..."></textarea>
+        <div class="pm-form-row">
+          <label class="pm-img-label">
+            ＋ 사진
+            <input type="file" id="pmFileInput" multiple accept="image/*" style="display:none">
+          </label>
+          <div class="pm-img-previews" id="pmImgPreviews"></div>
+          <button class="pm-submit" id="pmSubmit">등록</button>
+        </div>
+      </div>
+      <div class="pm-posts" id="pmPosts"></div>
+    </div>
+  </div>
+</div>
+
+<div class="pm-zoom-overlay" id="pmZoomOverlay">
+  <img id="pmZoomImg" src="" alt="">
+</div>
 
 <!-- ─── FOOTER ─── -->
 <div class="footer">
