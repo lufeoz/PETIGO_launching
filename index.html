@@ -1810,6 +1810,15 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const _sb = supabase.createClient(
+  'https://ukaqbuzofsvdoxkoesho.supabase.co',
+  'sb_publishable_Ssg9lR8nwee_rGpcDpgUow_JmLbloNo'
+);
+</script>
+
+
 <!-- ─── SCRIPT: DAILY VERSE ─── -->
 <script>
 (function () {
@@ -1874,10 +1883,6 @@
 <!-- ─── SCRIPT: PRODUCT BOARD ─── -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  var BOARD_KEY = 'petigo_product_board';
-  function loadBoard() { try { return JSON.parse(localStorage.getItem(BOARD_KEY)) || {}; } catch(e) { return {}; } }
-  function saveBoard(b) { localStorage.setItem(BOARD_KEY, JSON.stringify(b)); }
-
   var currentProduct = null;
   var pendingImgs    = [];
 
@@ -1892,7 +1897,15 @@ document.addEventListener('DOMContentLoaded', function () {
   var zoomOv    = document.getElementById('pmZoomOverlay');
   var zoomImg   = document.getElementById('pmZoomImg');
 
-  /* ── 열기/닫기 ── */
+  async function loadPosts() {
+    if (!currentProduct) return [];
+    var res = await _sb.from('product_posts')
+      .select('*')
+      .eq('product_key', currentProduct)
+      .order('created_at', { ascending: false });
+    return res.data || [];
+  }
+
   function openPage(productName) {
     currentProduct = productName;
     pendingImgs    = [];
@@ -1912,7 +1925,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
   document.getElementById('pmBack').addEventListener('click', closePage);
 
-  /* ── 사진 업로드 ── */
   fileInput.addEventListener('change', function () {
     Array.from(fileInput.files).forEach(function (file) {
       var reader = new FileReader();
@@ -1934,7 +1946,7 @@ document.addEventListener('DOMContentLoaded', function () {
       img.src = src;
       var del = document.createElement('button');
       del.className = 'pm-img-thumb-del';
-      del.textContent = '×';
+      del.textContent = '\u00d7';
       del.onclick = function () { pendingImgs.splice(i, 1); renderPreviews(); };
       wrap.appendChild(img);
       wrap.appendChild(del);
@@ -1942,59 +1954,50 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ── 등록 ── */
-  submitBtn.addEventListener('click', function () {
+  submitBtn.addEventListener('click', async function () {
     var text = textarea.value.trim();
     if (!text && pendingImgs.length === 0) return;
-    var board = loadBoard();
-    if (!board[currentProduct]) board[currentProduct] = [];
-    var now = new Date();
-    board[currentProduct].unshift({
-      id:   Date.now(),
-      time: now.toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }),
-      text: text,
-      imgs: pendingImgs.slice()
+    await _sb.from('product_posts').insert({
+      product_key: currentProduct,
+      content: text,
+      files: pendingImgs.slice()
     });
-    saveBoard(board);
     textarea.value = '';
     pendingImgs = [];
     previews.innerHTML = '';
-    renderPosts();
+    await renderPosts();
   });
 
-  /* ── 게시글 렌더링 ── */
   function esc(s) {
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
 
-  function renderPosts() {
-    var board = loadBoard();
-    var posts = (board[currentProduct] || []);
-    countEl.textContent = posts.length + '개';
+  async function renderPosts() {
+    var posts = await loadPosts();
+    countEl.textContent = posts.length + '\uAC1C';
     if (!posts.length) {
-      postsEl.innerHTML = '<div class="pm-empty">아직 기록이 없습니다.<br>첫 번째 기록을 남겨보세요.</div>';
+      postsEl.innerHTML = '<div class="pm-empty">\uC544\uC9C1 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.<br>\uCCAB \uBC88\uC9F8 \uAE30\uB85D\uC744 \uB0A8\uACA8\uBCF4\uC138\uC694.</div>';
       return;
     }
-    postsEl.innerHTML = posts.map(function (post, i) {
-      var imgs = (post.imgs && post.imgs.length)
+    postsEl.innerHTML = posts.map(function (post) {
+      var imgs = (post.files && post.files.length)
         ? '<div class="pm-post-imgs">' +
-          post.imgs.map(function (s) { return '<img src="' + s + '" data-zoom="' + s + '">'; }).join('') +
+          post.files.map(function (s) { return '<img src="' + s + '" data-zoom="' + s + '">'; }).join('') +
           '</div>' : '';
+      var time = post.created_at ? new Date(post.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
       return '<div class="pm-post">'
         + '<div class="pm-post-meta">'
-        + '<span class="pm-post-time">' + post.time + '</span>'
-        + '<button class="pm-post-del" data-idx="' + i + '">삭제</button>'
+        + '<span class="pm-post-time">' + time + '</span>'
+        + '<button class="pm-post-del" data-id="' + post.id + '">\uC0AD\uC81C</button>'
         + '</div>'
-        + (post.text ? '<div class="pm-post-text">' + esc(post.text) + '</div>' : '')
+        + (post.content ? '<div class="pm-post-text">' + esc(post.content) + '</div>' : '')
         + imgs + '</div>';
     }).join('');
 
     postsEl.querySelectorAll('.pm-post-del').forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        var board = loadBoard();
-        board[currentProduct].splice(parseInt(btn.dataset.idx), 1);
-        saveBoard(board);
-        renderPosts();
+      btn.addEventListener('click', async function () {
+        await _sb.from('product_posts').delete().eq('id', parseInt(btn.dataset.id));
+        await renderPosts();
       });
     });
 
@@ -2006,29 +2009,29 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  /* ── 이미지 줌 닫기 ── */
   zoomOv.addEventListener('click', function () {
     zoomOv.classList.remove('open');
     zoomImg.src = '';
   });
 
-  /* ── 제품 카드 클릭 연결 ── */
   document.querySelectorAll('.products-grid .product-card').forEach(function (card) {
     var name = card.querySelector('.product-name').textContent.trim();
     card.style.cursor = 'pointer';
     card.addEventListener('click', function () { openPage(name); });
   });
-});
-</script>
 
+  _sb.channel('product-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'product_posts' }, async function() {
+      if (currentProduct) await renderPosts();
+    })
+    .subscribe();
+});
+
+</script>
 
 <!-- ─── SCRIPT: CONFIRM PAGE ─── -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  var CF_KEY = 'petigo_confirm';
-  function load() { try { return JSON.parse(localStorage.getItem(CF_KEY)) || []; } catch(e) { return []; } }
-  function save(d) { localStorage.setItem(CF_KEY, JSON.stringify(d)); }
-
   var cfPage       = document.getElementById('cfPage');
   var cfBack       = document.getElementById('cfBack');
   var confirmBtn   = document.getElementById('confirmBtn');
@@ -2043,12 +2046,12 @@ document.addEventListener('DOMContentLoaded', function () {
   var cfFileNames  = document.getElementById('cfFileNames');
 
   var badgeClass = { urgent:'badge-urgent', normal:'badge-normal', done:'badge-done' };
-  var badgeLabel = { urgent:'🔴 긴급', normal:'🟡 보통', done:'✅ 완료' };
+  var badgeLabel = { urgent:'\ud83d\udd34 \uae34\uae09', normal:'\ud83d\udfe1 \ubcf4\ud1b5', done:'\u2705 \uc644\ub8cc' };
 
   var PERSONS = [
-    { value: 'jeon', label: '전실장', color: 'var(--color-jeon)' },
-    { value: 'yoo',  label: '유실장', color: 'var(--color-yoo)'  },
-    { value: 'ceo',  label: '대표',   color: 'var(--color-ceo)'  }
+    { value: 'jeon', label: '\uc804\uc2e4\uc7a5', color: 'var(--color-jeon)' },
+    { value: 'yoo',  label: '\uc720\uc2e4\uc7a5', color: 'var(--color-yoo)'  },
+    { value: 'ceo',  label: '\ub300\ud45c',   color: 'var(--color-ceo)'  }
   ];
   function personColor(v) {
     var p = PERSONS.find(function(x){return x.value===v;});
@@ -2059,15 +2062,13 @@ document.addEventListener('DOMContentLoaded', function () {
     return p ? p.label : v;
   }
 
-  // pending 파일 (base64)
   var pendingFiles = [];
   cfFileInput.addEventListener('change', function() {
     pendingFiles = [];
     cfFileNames.textContent = '';
-    var names = [];
     var files = Array.from(cfFileInput.files);
     var done = 0;
-    if (!files.length) { cfFileNames.textContent = '선택된 파일 없음'; return; }
+    if (!files.length) { cfFileNames.textContent = '\uc120\ud0dd\ub41c \ud30c\uc77c \uc5c6\uc74c'; return; }
     files.forEach(function(file) {
       var reader = new FileReader();
       reader.onload = function(e) {
@@ -2081,77 +2082,89 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  function updateHeaderCount() {
-    var data = load();
+  async function loadPosts() {
+    var res = await _sb.from('confirm_posts')
+      .select('*, confirm_comments(*)')
+      .order('created_at', { ascending: false });
+    return res.data || [];
+  }
+
+  async function updateHeaderCount() {
+    var data = await loadPosts();
     var pending = data.filter(function(p){ return p.priority !== 'done'; }).length;
     confirmCount.textContent = pending;
-    cfTotal.textContent = data.length + '건';
+    cfTotal.textContent = data.length + '\uAC74';
   }
 
   function esc(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-  }
-  function timeStr() {
-    return new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
 
-  function renderPosts() {
-    var data = load();
-    updateHeaderCount();
+  function fmtTime(ts) {
+    if (!ts) return '';
+    return new Date(ts).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }
+
+  async function renderPosts() {
+    var data = await loadPosts();
+    var pending = data.filter(function(p){ return p.priority !== 'done'; }).length;
+    confirmCount.textContent = pending;
+    cfTotal.textContent = data.length + '\uAC74';
+
     if (!data.length) {
-      cfPosts.innerHTML = '<div class="cf-empty">등록된 컨펌 사항이 없습니다.</div>';
+      cfPosts.innerHTML = '<div class="cf-empty">\ub4f1\ub85d\ub41c \ucee8\ud380 \uc0ac\ud56d\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.</div>';
       return;
     }
-    cfPosts.innerHTML = data.map(function(post, pi) {
-      // 댓글 HTML
-      var commentsHtml = (post.comments || []).map(function(cm, ci) {
+    cfPosts.innerHTML = data.map(function(post) {
+      var comments = (post.confirm_comments || []).sort(function(a,b) {
+        return new Date(a.created_at) - new Date(b.created_at);
+      });
+      var commentsHtml = comments.map(function(cm) {
         var color = personColor(cm.author);
         var authorName = personLabel(cm.author);
-        return '<div class="cf-comment" data-pi="'+pi+'" data-ci="'+ci+'">'
+        return '<div class="cf-comment">'
           + '<div class="cf-comment-dot" style="background:'+color+'"></div>'
           + '<div style="flex:1">'
           + '<div class="cf-comment-author" style="color:'+color+'">'+esc(authorName)+'</div>'
-          + '<div class="cf-comment-text">'+esc(cm.text)+'</div>'
-          + '<div class="cf-comment-time">'+cm.time+'</div>'
+          + '<div class="cf-comment-text">'+esc(cm.body)+'</div>'
+          + '<div class="cf-comment-time">'+fmtTime(cm.created_at)+'</div>'
           + '</div>'
-          + '<button class="cf-comment-del" data-pi="'+pi+'" data-ci="'+ci+'">×</button>'
+          + '<button class="cf-comment-del" data-cmid="'+cm.id+'">\u00d7</button>'
           + '</div>';
       }).join('');
 
-      // 댓글 입력 폼 (작성자 선택 포함)
       var personOptions = PERSONS.map(function(p) {
         return '<option value="'+p.value+'">'+p.label+'</option>';
       }).join('');
       var commentForm = '<div class="cf-comment-form">'
-        + '<select class="cf-author-sel" data-pi="'+pi+'">'+personOptions+'</select>'
-        + '<input class="cf-comment-input" data-pi="'+pi+'" type="text" placeholder="댓글을 입력하세요...">'
-        + '<button class="cf-comment-submit" data-pi="'+pi+'">등록</button>'
+        + '<select class="cf-author-sel" data-pid="'+post.id+'">'+personOptions+'</select>'
+        + '<input class="cf-comment-input" data-pid="'+post.id+'" type="text" placeholder="\ub313\uae00\uc744 \uc785\ub825\ud558\uc138\uc694...">'
+        + '<button class="cf-comment-submit" data-pid="'+post.id+'">\ub4f1\ub85d</button>'
         + '</div>';
 
-      // 첨부파일 HTML
       var filesHtml = '';
       if (post.files && post.files.length) {
         filesHtml = '<div class="cf-post-files">'
           + post.files.map(function(f) {
-              return '<a class="cf-post-file-item" href="'+f.data+'" download="'+esc(f.name)+'" target="_blank">📎 '+esc(f.name)+'</a>';
+              return '<a class="cf-post-file-item" href="'+f.data+'" download="'+esc(f.name)+'" target="_blank">\ud83d\udcce '+esc(f.name)+'</a>';
             }).join('')
           + '</div>';
       }
 
-      return '<div class="cf-post" data-pi="'+pi+'">'
+      return '<div class="cf-post" data-pid="'+post.id+'">'
         + '<div class="cf-post-head">'
         + '<span class="cf-post-badge '+badgeClass[post.priority]+'">'+badgeLabel[post.priority]+'</span>'
         + '<div class="cf-post-content">'
         + '<div class="cf-post-title">'+esc(post.title)+'</div>'
         + (post.body ? '<div class="cf-post-body">'+esc(post.body)+'</div>' : '')
         + '<div class="cf-post-meta">'
-        + '<span class="cf-post-time">'+post.time+'</span>'
-        + '<button class="cf-post-status-btn" data-pi="'+pi+'">상태 변경</button>'
-        + '<button class="cf-post-del" data-pi="'+pi+'">삭제</button>'
+        + '<span class="cf-post-time">'+fmtTime(post.created_at)+'</span>'
+        + '<button class="cf-post-status-btn" data-pid="'+post.id+'" data-priority="'+post.priority+'">\uc0c1\ud0dc \ubcc0\uacbd</button>'
+        + '<button class="cf-post-del" data-pid="'+post.id+'">\uc0ad\uc81c</button>'
         + '</div>'
         + '</div>'
         + '</div>'
-        + (filesHtml)
+        + filesHtml
         + '<div class="cf-comments">'
         + commentsHtml
         + commentForm
@@ -2159,77 +2172,63 @@ document.addEventListener('DOMContentLoaded', function () {
         + '</div>';
     }).join('');
 
-    // 상태 변경
     cfPosts.querySelectorAll('.cf-post-status-btn').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var pi = parseInt(btn.dataset.pi);
-        var data = load();
+      btn.addEventListener('click', async function() {
         var order = ['urgent','normal','done'];
-        var cur = order.indexOf(data[pi].priority);
-        data[pi].priority = order[(cur + 1) % order.length];
-        save(data); renderPosts();
+        var cur = order.indexOf(btn.dataset.priority);
+        var next = order[(cur + 1) % order.length];
+        await _sb.from('confirm_posts').update({ priority: next, updated_at: new Date().toISOString() }).eq('id', parseInt(btn.dataset.pid));
+        await renderPosts();
       });
     });
 
-    // 게시글 삭제
     cfPosts.querySelectorAll('.cf-post-del').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var data = load();
-        data.splice(parseInt(btn.dataset.pi), 1);
-        save(data); renderPosts();
+      btn.addEventListener('click', async function() {
+        await _sb.from('confirm_posts').delete().eq('id', parseInt(btn.dataset.pid));
+        await renderPosts();
       });
     });
 
-    // 댓글 삭제
     cfPosts.querySelectorAll('.cf-comment-del').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var data = load();
-        data[parseInt(btn.dataset.pi)].comments.splice(parseInt(btn.dataset.ci), 1);
-        save(data); renderPosts();
+      btn.addEventListener('click', async function() {
+        await _sb.from('confirm_comments').delete().eq('id', parseInt(btn.dataset.cmid));
+        await renderPosts();
       });
     });
 
-    // 댓글 등록
     cfPosts.querySelectorAll('.cf-comment-submit').forEach(function(btn) {
-      var pi = parseInt(btn.dataset.pi);
-      var input  = cfPosts.querySelector('.cf-comment-input[data-pi="'+pi+'"]');
-      var selEl  = cfPosts.querySelector('.cf-author-sel[data-pi="'+pi+'"]');
-      function submit() {
+      var pid = parseInt(btn.dataset.pid);
+      var input = cfPosts.querySelector('.cf-comment-input[data-pid="'+pid+'"]');
+      var selEl = cfPosts.querySelector('.cf-author-sel[data-pid="'+pid+'"]');
+      async function submit() {
         var text = input.value.trim();
         if (!text) return;
-        var data = load();
-        if (!data[pi].comments) data[pi].comments = [];
-        data[pi].comments.push({ author: selEl.value, text: text, time: timeStr() });
-        save(data); renderPosts();
+        await _sb.from('confirm_comments').insert({ post_id: pid, author: selEl.value, body: text });
+        await renderPosts();
       }
       btn.addEventListener('click', submit);
       input.addEventListener('keydown', function(e) { if (e.key === 'Enter') submit(); });
     });
   }
 
-  // 등록
-  cfSubmit.addEventListener('click', function() {
+  cfSubmit.addEventListener('click', async function() {
     var title = cfInputTitle.value.trim();
     if (!title) { cfInputTitle.focus(); return; }
-    var data = load();
-    data.unshift({
-      id: Date.now(), title: title,
+    await _sb.from('confirm_posts').insert({
+      title: title,
       body: cfInputBody.value.trim(),
       priority: cfPrioritySel.value,
-      files: pendingFiles.slice(),
-      time: timeStr(), comments: []
+      files: pendingFiles.slice()
     });
-    save(data);
     cfInputTitle.value = '';
     cfInputBody.value  = '';
     cfPrioritySel.value = 'normal';
     cfFileInput.value = '';
-    cfFileNames.textContent = '선택된 파일 없음';
+    cfFileNames.textContent = '\uc120\ud0dd\ub41c \ud30c\uc77c \uc5c6\uc74c';
     pendingFiles = [];
-    renderPosts();
+    await renderPosts();
   });
 
-  // 열기/닫기
   function openCf() {
     cfPage.classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -2242,17 +2241,27 @@ document.addEventListener('DOMContentLoaded', function () {
   confirmBtn.addEventListener('click', openCf);
   cfBack.addEventListener('click', closeCf);
 
-  // 좌우 여백 클릭 시 닫기
   cfPage.addEventListener('click', function(e) {
     var body = cfPage.querySelector('.cf-body');
     var header = cfPage.querySelector('.cf-header');
-    if (!body.contains(e.target) && !header.contains(e.target)) {
-      closeCf();
-    }
+    if (!body.contains(e.target) && !header.contains(e.target)) closeCf();
   });
+
+  _sb.channel('confirm-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'confirm_posts' }, async function() {
+      if (cfPage.classList.contains('open')) await renderPosts();
+      else await updateHeaderCount();
+    })
+    .subscribe();
+  _sb.channel('confirm-comments-rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'confirm_comments' }, async function() {
+      if (cfPage.classList.contains('open')) await renderPosts();
+    })
+    .subscribe();
 
   updateHeaderCount();
 });
+
 </script>
 
 <!-- ─── SCRIPT: MILESTONE PAGE ─── -->
@@ -2277,63 +2286,72 @@ document.addEventListener('DOMContentLoaded', function () {
 <!-- ─── SCRIPT: NEXT ACTIONS + TASK DETAIL + CHANGELOG ─── -->
 <script>
 (function () {
-  const TASK_KEY  = 'petigo_task_state';
-  const NEW_KEY   = 'petigo_new_tasks';
-  const LOG_KEY   = 'petigo_changelog';
-
-  const loadState = () => { try { return JSON.parse(localStorage.getItem(TASK_KEY)) || {}; } catch { return {}; } };
-  const saveState = s => localStorage.setItem(TASK_KEY, JSON.stringify(s));
-  const loadNew   = () => { try { return JSON.parse(localStorage.getItem(NEW_KEY))  || []; } catch { return []; } };
-  const saveNew   = a => localStorage.setItem(NEW_KEY, JSON.stringify(a));
-  const loadLog   = () => { try { return JSON.parse(localStorage.getItem(LOG_KEY))  || []; } catch { return []; } };
-  const saveLog   = a => localStorage.setItem(LOG_KEY, JSON.stringify(a));
-
-  /* ── 변경 이력 ── */
-  function addLog(type, context, changes, newVal) {
-    const log = loadLog();
-    log.unshift({ type, context, changes: changes ?? null, newVal: newVal ?? '',
-      time: new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+  /* ── DB helpers ── */
+  async function dbGetTasks() {
+    const { data, error } = await _sb.from('tasks').select('*').order('created_at');
+    if (error) console.error('dbGetTasks:', error);
+    return data || [];
+  }
+  async function dbUpsertTask(id, listIdx, fields) {
+    const row = { id, list_idx: listIdx, updated_at: new Date().toISOString() };
+    if (fields.title !== undefined)     row.title = fields.title;
+    if (fields.detail !== undefined)    row.detail = fields.detail;
+    if (fields.log !== undefined)       row.log = fields.log;
+    if (fields.files !== undefined)     row.files = fields.files;
+    if (fields.completed !== undefined) row.completed = fields.completed;
+    const { error } = await _sb.from('tasks').upsert(row, { onConflict: 'id' });
+    if (error) console.error('dbUpsertTask:', error);
+  }
+  async function dbDeleteTask(id) {
+    const { error } = await _sb.from('tasks').delete().eq('id', id);
+    if (error) console.error('dbDeleteTask:', error);
+  }
+  async function dbInsertLog(type, context, changes, newVal) {
+    const { error } = await _sb.from('changelog').insert({
+      type, context, changes: changes || null, new_val: newVal || ''
     });
-    if (log.length > 200) log.length = 200;
-    saveLog(log);
-    renderChangelog();
+    if (error) console.error('dbInsertLog:', error);
+  }
+  async function dbGetChangelog() {
+    const { data } = await _sb.from('changelog').select('*').order('created_at', { ascending: false }).limit(200);
+    return data || [];
   }
 
-  function esc2(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  /* ── changelog render ── */
+  function esc2(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-  function renderChangelog() {
+  async function renderChangelog() {
     const list = document.getElementById('changelogList');
     if (!list) return;
-    const log = loadLog();
-    if (!log.length) { list.innerHTML = '<div class="changelog-empty">아직 변경 이력이 없습니다.</div>'; return; }
-    const badgeMap = { edit:['clog-badge-edit','수정'], check:['clog-badge-check','체크'], add:['clog-badge-add','추가'], delete:['clog-badge-delete','삭제'] };
+    const log = await dbGetChangelog();
+    if (!log.length) { list.innerHTML = '<div class="changelog-empty">\uc544\uc9c1 \ubcc0\uacbd \uc774\ub825\uc774 \uc5c6\uc2b5\ub2c8\ub2e4.</div>'; return; }
+    const badgeMap = { edit:['clog-badge-edit','\uc218\uc815'], check:['clog-badge-check','\uccb4\ud06c'], add:['clog-badge-add','\ucd94\uac00'], delete:['clog-badge-delete','\uc0ad\uc81c'] };
     list.innerHTML = log.map(e => {
-      const [cls, label] = badgeMap[e.type] || ['clog-badge-edit','변경'];
+      const [cls, label] = badgeMap[e.type] || ['clog-badge-edit','\ubcc0\uacbd'];
       let body = '';
       if (e.type === 'edit' && Array.isArray(e.changes)) {
-        // 변경 항목 묶음 표시
         body = e.changes.map(ch =>
-          `<div class="clog-change-row">`
-          + `<span class="clog-field">${esc2(ch.field)}</span>`
-          + `<div class="clog-old">${esc2(ch.oldVal)||'(비어있음)'}</div>`
-          + `<div class="clog-arrow">↓</div>`
-          + `<div class="clog-new">${esc2(ch.newVal)||'(비어있음)'}</div>`
-          + `</div>`
+          '<div class="clog-change-row">'
+          + '<span class="clog-field">' + esc2(ch.field) + '</span>'
+          + '<div class="clog-old">' + (esc2(ch.oldVal)||'(\ube44\uc5b4\uc788\uc74c)') + '</div>'
+          + '<div class="clog-arrow">\u2193</div>'
+          + '<div class="clog-new">' + (esc2(ch.newVal)||'(\ube44\uc5b4\uc788\uc74c)') + '</div>'
+          + '</div>'
         ).join('');
       } else {
-        body = `<div class="clog-new">${esc2(e.newVal)||esc2(e.oldVal)||''}</div>`;
+        body = '<div class="clog-new">' + esc2(e.new_val||'') + '</div>';
       }
-      return `<div class="changelog-entry"><div class="clog-time">${e.time}</div><span class="clog-badge ${cls}">${label}</span><div class="clog-context">${esc2(e.context)}</div>${body}</div>`;
+      const time = e.created_at ? new Date(e.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+      return '<div class="changelog-entry"><div class="clog-time">' + time + '</div><span class="clog-badge ' + cls + '">' + label + '</span><div class="clog-context">' + esc2(e.context) + '</div>' + body + '</div>';
     }).join('');
   }
 
-  /* ── 햄버거 드로어 ── */
+  /* ── drawer ── */
   function initDrawer() {
     const btn = document.getElementById('hamburgerBtn');
     const drawer = document.getElementById('changelogDrawer');
     const overlay = document.getElementById('drawerOverlay');
     const closeBtn = document.getElementById('drawerClose');
-
     const open  = () => { drawer.classList.add('open'); overlay.classList.add('show'); btn.classList.add('active'); renderChangelog(); };
     const close = () => { drawer.classList.remove('open'); overlay.classList.remove('show'); btn.classList.remove('active'); };
     btn.addEventListener('click', () => drawer.classList.contains('open') ? close() : open());
@@ -2341,32 +2359,40 @@ document.addEventListener('DOMContentLoaded', function () {
     overlay.addEventListener('click', close);
   }
 
-  /* ── 요약 자동 생성 ── */
+  /* ── summary ── */
   function makeSummary(text) {
     if (!text) return '';
     const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
     const first = lines[0] || '';
-    return first.length > 130 ? first.slice(0, 130) + '…' : first;
+    return first.length > 130 ? first.slice(0, 130) + '\u2026' : first;
   }
 
-  /* ── 과업 상세 페이지 ── */
-  let tdCurrentId   = null;
+  function getPersonName(item) {
+    const card = item && item.closest && item.closest('.person-card');
+    return card ? (card.querySelector('.person-name') || {}).textContent || '\ub2f4\ub2f9\uc790' : '\ub2f4\ub2f9\uc790';
+  }
+
+  /* ── task detail state ── */
+  let tdCurrentId = null;
   let tdCurrentItem = null;
+  let tdCurrentListIdx = 0;
   let tdPendingFiles = [];
+  let tasksCache = [];
 
-  function openTaskDetail(id, itemEl, personName) {
-    tdCurrentId   = id;
-    tdCurrentItem = itemEl;
-    tdPendingFiles = [];
+  function findCached(id) { return tasksCache.find(t => t.id === id) || {}; }
 
-    const state = loadState();
-    const saved = state[id] || {};
+  function openTaskDetail(id, itemEl, personName, listIdx) {
+    tdCurrentId      = id;
+    tdCurrentItem    = itemEl;
+    tdCurrentListIdx = listIdx || 0;
+    tdPendingFiles   = [];
 
-    document.getElementById('tdPerson').textContent = personName;
-    document.getElementById('tdTitleInput').value    = saved.title  || itemEl.querySelector('.task-title')?.textContent || '';
+    const saved = findCached(id);
+    document.getElementById('tdPerson').textContent  = personName;
+    document.getElementById('tdTitleInput').value    = saved.title  || (itemEl.querySelector('.task-title') || {}).textContent || '';
     document.getElementById('tdContentInput').value  = saved.detail || '';
     document.getElementById('tdLogInput').value      = saved.log    || '';
-    tdPendingFiles = saved.files ? saved.files.slice() : [];
+    tdPendingFiles = saved.files ? (Array.isArray(saved.files) ? saved.files.slice() : []) : [];
     renderFileList();
 
     document.getElementById('tdPage').classList.add('open');
@@ -2380,35 +2406,38 @@ document.addEventListener('DOMContentLoaded', function () {
     tdCurrentId = null; tdCurrentItem = null; tdPendingFiles = [];
   }
 
-  function saveTaskDetail() {
+  async function saveTaskDetail() {
     if (!tdCurrentId) return;
     const title  = document.getElementById('tdTitleInput').value.trim();
     const detail = document.getElementById('tdContentInput').value.trim();
     const log    = document.getElementById('tdLogInput').value;
-    const state  = loadState();
-    const prev   = state[tdCurrentId] || {};
+    const prev   = findCached(tdCurrentId);
+    const completed = tdCurrentItem ? tdCurrentItem.classList.contains('completed') : false;
 
-    // 변경된 항목을 하나의 로그로 묶어 기록
     const changes = [];
-    if (title  !== (prev.title  || '')) changes.push({ field: '제목', oldVal: prev.title || '', newVal: title });
-    if (detail !== (prev.detail || '')) changes.push({ field: '내용', oldVal: prev.detail || '', newVal: detail });
+    if (title  !== (prev.title  || '')) changes.push({ field: '\uc81c\ubaa9', oldVal: prev.title || '', newVal: title });
+    if (detail !== (prev.detail || '')) changes.push({ field: '\ub0b4\uc6a9', oldVal: prev.detail || '', newVal: detail });
+
+    await dbUpsertTask(tdCurrentId, tdCurrentListIdx, { title, detail, log, files: tdPendingFiles, completed });
+
     if (changes.length) {
       const person = getPersonName(tdCurrentItem);
-      const taskTitle = title || prev.title || '(제목 없음)';
-      addLog('edit', person + ' · ' + taskTitle, changes, null);
+      const taskTitle = title || prev.title || '(\uc81c\ubaa9 \uc5c6\uc74c)';
+      await dbInsertLog('edit', person + ' \u00b7 ' + taskTitle, changes, null);
     }
 
-    state[tdCurrentId] = { ...prev, title, detail, log, files: tdPendingFiles };
-    saveState(state);
+    const idx = tasksCache.findIndex(t => t.id === tdCurrentId);
+    const updated = { id: tdCurrentId, list_idx: tdCurrentListIdx, title, detail, log, files: tdPendingFiles, completed };
+    if (idx >= 0) tasksCache[idx] = { ...tasksCache[idx], ...updated }; else tasksCache.push(updated);
 
-    // 메인 목록 업데이트: 제목 + 자동 요약
     if (tdCurrentItem) {
       const titleEl  = tdCurrentItem.querySelector('.task-title');
       const detailEl = tdCurrentItem.querySelector('.task-detail');
       if (titleEl)  titleEl.textContent  = title;
       if (detailEl) detailEl.textContent = makeSummary(detail);
     }
-    persistNewTasks();
+
+    await renderChangelog();
     closeTaskDetail();
   }
 
@@ -2430,10 +2459,10 @@ document.addEventListener('DOMContentLoaded', function () {
     tdPendingFiles.forEach((f, i) => {
       const item = document.createElement('div');
       item.className = 'td-file-item';
-      const kb = Math.round((f.dataUrl.length * 0.75) / 1024);
-      item.innerHTML = `<div class="td-file-name">📄 ${f.name}</div><div class="td-file-size">${kb} KB</div>`;
+      const kb = Math.round(((f.dataUrl||'').length * 0.75) / 1024);
+      item.innerHTML = '<div class="td-file-name">\ud83d\udcc4 ' + f.name + '</div><div class="td-file-size">' + kb + ' KB</div>';
       const del = document.createElement('button');
-      del.className = 'td-file-del'; del.textContent = '×';
+      del.className = 'td-file-del'; del.textContent = '\u00d7';
       del.onclick = () => { tdPendingFiles.splice(i, 1); renderFileList(); };
       item.appendChild(del);
       if (f.type && f.type.startsWith('image/')) {
@@ -2445,7 +2474,7 @@ document.addEventListener('DOMContentLoaded', function () {
         item.querySelector('.td-file-name').textContent = f.name;
       } else {
         const dl = document.createElement('button');
-        dl.textContent = '↓'; dl.style = 'background:none;border:none;color:var(--grey);cursor:pointer;font-size:14px;flex-shrink:0;';
+        dl.textContent = '\u2193'; dl.style = 'background:none;border:none;color:var(--grey);cursor:pointer;font-size:14px;flex-shrink:0;';
         dl.onclick = () => { const a = document.createElement('a'); a.href = f.dataUrl; a.download = f.name; a.click(); };
         item.insertBefore(dl, item.firstChild);
       }
@@ -2456,99 +2485,64 @@ document.addEventListener('DOMContentLoaded', function () {
   function initTaskDetailPage() {
     document.getElementById('tdBack').addEventListener('click', closeTaskDetail);
     document.getElementById('tdSaveBtn').addEventListener('click', saveTaskDetail);
-    document.getElementById('tdDelBtn').addEventListener('click', () => {
+    document.getElementById('tdDelBtn').addEventListener('click', async () => {
       if (!tdCurrentItem) return;
-      if (!confirm('이 과업을 삭제할까요?')) return;
+      if (!confirm('\uc774 \uacfc\uc5c5\uc744 \uc0ad\uc81c\ud560\uae4c\uc694?')) return;
       const person = getPersonName(tdCurrentItem);
-      const title  = document.getElementById('tdTitleInput').value || '(제목 없음)';
-      addLog('delete', person + ' · 과업 삭제', null, '"' + title + '" 삭제됨');
-      const s = loadState(); delete s[tdCurrentId]; saveState(s);
+      const title  = document.getElementById('tdTitleInput').value || '(\uc81c\ubaa9 \uc5c6\uc74c)';
+      await dbDeleteTask(tdCurrentId);
+      tasksCache = tasksCache.filter(t => t.id !== tdCurrentId);
+      await dbInsertLog('delete', person + ' \u00b7 \uacfc\uc5c5 \uc0ad\uc81c', null, '"' + title + '" \uc0ad\uc81c\ub428');
       tdCurrentItem.remove();
-      persistNewTasks();
+      await renderChangelog();
       closeTaskDetail();
     });
 
-    // 파일 input
     const fileInput = document.getElementById('tdFileInput');
-    fileInput.addEventListener('change', function () {
-      addFiles(this.files);
-      this.value = '';
-    });
+    fileInput.addEventListener('change', function () { addFiles(this.files); this.value = ''; });
 
-    // 드래그 드롭
-    const dropZone = document.getElementById('tdDropZone');
+    const dropZone  = document.getElementById('tdDropZone');
     const dropInner = document.getElementById('tdDropInner');
-
     dropInner.addEventListener('click', () => fileInput.click());
-
-    dropZone.addEventListener('dragover', e => {
-      e.preventDefault(); e.stopPropagation();
-      dropZone.classList.add('drag-over');
-    });
-    dropZone.addEventListener('dragleave', e => {
-      if (!dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over');
-    });
-    dropZone.addEventListener('drop', e => {
-      e.preventDefault(); e.stopPropagation();
-      dropZone.classList.remove('drag-over');
-      addFiles(e.dataTransfer.files);
-    });
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); e.stopPropagation(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', e => { if (!dropZone.contains(e.relatedTarget)) dropZone.classList.remove('drag-over'); });
+    dropZone.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); dropZone.classList.remove('drag-over'); addFiles(e.dataTransfer.files); });
   }
 
-  /* ── helpers ── */
-  function getPersonName(item) {
-    const card = item?.closest?.('.person-card');
-    return card ? card.querySelector('.person-name')?.textContent?.trim() || '담당자' : '담당자';
-  }
-
-  function persistNewTasks() {
-    const arr = [];
-    document.querySelectorAll('.actions-grid .task-list').forEach((list, li) => {
-      list.querySelectorAll('.task-item[data-new="true"]').forEach(item => {
-        const state = loadState();
-        const saved = state[item.dataset.taskId] || {};
-        arr.push({ listIdx: li, id: item.dataset.taskId,
-          title:  saved.title  || item.querySelector('.task-title')?.textContent  || '',
-          detail: saved.detail || '',
-          completed: item.classList.contains('completed'),
-          files: saved.files || []
-        });
-      });
-    });
-    saveNew(arr);
-  }
-
-  /* ── 기존 task-item 에 이벤트 연결 ── */
+  /* ── attach events ── */
   function attachItemEvents(item, listIdx) {
     const id       = item.dataset.taskId;
     const checkbox = item.querySelector('.task-checkbox');
     const content  = item.querySelector('.task-content');
     const personName = getPersonName(item);
 
-    checkbox.addEventListener('click', e => {
+    checkbox.addEventListener('click', async e => {
       e.stopPropagation();
       const done = item.classList.toggle('completed');
       checkbox.classList.toggle('checked', done);
-      const title = item.querySelector('.task-title')?.textContent || id;
-      addLog('check', personName + ' · 체크박스', null, done ? '✅ 완료: "' + title + '"' : '↩ 미완료: "' + title + '"');
-      const s = loadState(); s[id] = { ...(s[id]||{}), completed: done }; saveState(s);
+      const title = (item.querySelector('.task-title') || {}).textContent || id;
+      const cached = findCached(id);
+      await dbUpsertTask(id, listIdx, { ...cached, completed: done });
+      const idx = tasksCache.findIndex(t => t.id === id);
+      if (idx >= 0) tasksCache[idx] = { ...tasksCache[idx], completed: done };
+      await dbInsertLog('check', personName + ' \u00b7 \uccb4\ud06c\ubc15\uc2a4', null, done ? '\u2705 \uc644\ub8cc: "' + title + '"' : '\u21a9 \ubbf8\uc644\ub8cc: "' + title + '"');
+      await renderChangelog();
     });
 
-    content.addEventListener('click', () => openTaskDetail(id, item, personName));
+    content.addEventListener('click', () => openTaskDetail(id, item, personName, listIdx));
   }
 
-  /* ── 새 과업 아이템 생성 ── */
-  function createNewItem(listIdx, id, title, detail, done) {
+  function createTaskItem(listIdx, id, title, detail, done) {
     const item = document.createElement('div');
-    item.className = 'task-item'; item.dataset.taskId = id; item.dataset.new = 'true';
+    item.className = 'task-item'; item.dataset.taskId = id;
 
     const cbx = document.createElement('div');
     cbx.className = 'task-checkbox' + (done ? ' checked' : '');
     const dl = document.createElement('div');
-    dl.className = 'task-deadline deadline-normal'; dl.textContent = '기간';
+    dl.className = 'task-deadline deadline-normal'; dl.textContent = '\uAE30\uAC04';
     const ct = document.createElement('div');
     ct.className = 'task-content';
-    ct.innerHTML = `<div class="task-title">${title||'새 과업'}</div><div class="task-detail">${makeSummary(detail)||''}</div>`;
+    ct.innerHTML = '<div class="task-title">' + (title||'\uc0c8 \uacfc\uc5c5') + '</div><div class="task-detail">' + (makeSummary(detail)||'') + '</div>';
 
     item.appendChild(cbx); item.appendChild(dl); item.appendChild(ct);
     if (done) item.classList.add('completed');
@@ -2556,64 +2550,106 @@ document.addEventListener('DOMContentLoaded', function () {
     return item;
   }
 
-  /* ── 초기화 ── */
-  function initTasks() {
-    const state = loadState();
+  /* ── init ── */
+  async function initTasks() {
+    tasksCache = await dbGetTasks();
+    const taskMap = {};
+    tasksCache.forEach(t => { taskMap[t.id] = t; });
+
     const lists = document.querySelectorAll('.actions-grid .task-list');
 
     lists.forEach((list, listIdx) => {
-      list.querySelectorAll('.task-item').forEach((item, taskIdx) => {
-        const id = `task-${listIdx}-${taskIdx}`;
+      const builtinItems = Array.from(list.querySelectorAll('.task-item'));
+
+      builtinItems.forEach((item, taskIdx) => {
+        const id = 'task-' + listIdx + '-' + taskIdx;
         item.dataset.taskId = id;
 
         const cbx = document.createElement('div');
         cbx.className = 'task-checkbox';
         item.insertBefore(cbx, item.firstChild);
 
-        const saved = state[id] || {};
-        if (saved.completed) { item.classList.add('completed'); cbx.classList.add('checked'); }
         const titleEl  = item.querySelector('.task-title');
         const detailEl = item.querySelector('.task-detail');
-        if (saved.title  && titleEl)  titleEl.textContent  = saved.title;
-        if (saved.detail && detailEl) detailEl.textContent = makeSummary(saved.detail);
 
-        const content = item.querySelector('.task-content');
+        if (taskMap[id]) {
+          const saved = taskMap[id];
+          if (saved.completed) { item.classList.add('completed'); cbx.classList.add('checked'); }
+          if (saved.title  && titleEl)  titleEl.textContent  = saved.title;
+          if (saved.detail && detailEl) detailEl.textContent = makeSummary(saved.detail);
+        } else {
+          const t = titleEl ? titleEl.textContent : '';
+          const d = detailEl ? detailEl.textContent : '';
+          dbUpsertTask(id, listIdx, { title: t, detail: d, log: '', files: [], completed: false });
+          tasksCache.push({ id, list_idx: listIdx, title: t, detail: d, log: '', files: [], completed: false });
+        }
+
+        let content = item.querySelector('.task-content');
         if (!content) {
-          const ct = document.createElement('div');
-          ct.className = 'task-content';
-          if (titleEl)  ct.appendChild(titleEl);
-          if (detailEl) ct.appendChild(detailEl);
-          item.appendChild(ct);
+          content = document.createElement('div');
+          content.className = 'task-content';
+          if (titleEl)  content.appendChild(titleEl);
+          if (detailEl) content.appendChild(detailEl);
+          item.appendChild(content);
         }
         attachItemEvents(item, listIdx);
       });
 
-      loadNew().filter(t => t.listIdx === listIdx).forEach(t => {
-        list.appendChild(createNewItem(listIdx, t.id, t.title, t.detail, t.completed));
-      });
+      const builtinIds = new Set(builtinItems.map((_, ti) => 'task-' + listIdx + '-' + ti));
+      const newTasks = tasksCache.filter(t => t.list_idx === listIdx && !builtinIds.has(t.id));
 
       const addBtn = document.createElement('button');
-      addBtn.className = 'add-task-btn'; addBtn.textContent = '+ 과업 추가';
+      addBtn.className = 'add-task-btn'; addBtn.textContent = '+ \uacfc\uc5c5 \ucd94\uac00';
+
+      newTasks.forEach(t => list.appendChild(createTaskItem(listIdx, t.id, t.title, t.detail, t.completed)));
       list.appendChild(addBtn);
 
-      addBtn.addEventListener('click', () => {
-        const id   = `new-${listIdx}-${Date.now()}`;
-        const item = createNewItem(listIdx, id, '', '', false);
+      addBtn.addEventListener('click', async () => {
+        const id   = 'new-' + listIdx + '-' + Date.now();
+        const item = createTaskItem(listIdx, id, '', '', false);
         list.insertBefore(item, addBtn);
-        persistNewTasks();
+        await dbUpsertTask(id, listIdx, { title: '', detail: '', log: '', files: [], completed: false });
+        tasksCache.push({ id, list_idx: listIdx, title: '', detail: '', log: '', files: [], completed: false });
         const personName = getPersonName(item);
-        addLog('add', personName + ' · 새 과업 추가', null, '새 과업이 추가되었습니다');
-        openTaskDetail(id, item, personName);
+        await dbInsertLog('add', personName + ' \u00b7 \uc0c8 \uacfc\uc5c5 \ucd94\uac00', null, '\uc0c8 \uacfc\uc5c5\uc774 \ucd94\uac00\ub418\uc5c8\uc2b5\ub2c8\ub2e4');
+        await renderChangelog();
+        openTaskDetail(id, item, personName, listIdx);
       });
     });
 
+    /* ── Realtime ── */
+    _sb.channel('tasks-rt')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tasks' }, async function(payload) {
+        tasksCache = await dbGetTasks();
+        const t = payload.new;
+        if (!t || !t.id) return;
+        const item = document.querySelector('[data-task-id="' + t.id + '"]');
+        if (item) {
+          const titleEl  = item.querySelector('.task-title');
+          const detailEl = item.querySelector('.task-detail');
+          const cbx      = item.querySelector('.task-checkbox');
+          if (t.completed) { item.classList.add('completed'); if(cbx) cbx.classList.add('checked'); }
+          else             { item.classList.remove('completed'); if(cbx) cbx.classList.remove('checked'); }
+          if (titleEl)  titleEl.textContent  = t.title  || '';
+          if (detailEl) detailEl.textContent = makeSummary(t.detail || '');
+        }
+      })
+      .subscribe();
+
+    _sb.channel('changelog-rt')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'changelog' }, async function() {
+        await renderChangelog();
+      })
+      .subscribe();
+
     initDrawer();
     initTaskDetailPage();
-    renderChangelog();
+    await renderChangelog();
   }
 
   document.addEventListener('DOMContentLoaded', initTasks);
 })();
+
 </script>
 
 <!-- ─── PRODUCT BOARD PAGE ─── -->
