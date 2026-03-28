@@ -919,26 +919,25 @@
   }
   .product-card:hover::after { color: var(--white); }
 
-  /* ── 게시판 전체화면 페이지 ── */
+  /* ── 게시판 전체화면 페이지 (노션 스타일) ── */
   .pm-page {
     position: fixed; inset: 0;
     z-index: 2000;
     display: flex; flex-direction: column;
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0; pointer-events: none;
     transition: opacity 0.18s ease;
+    background: var(--charcoal);
   }
   .pm-page.open { opacity: 1; pointer-events: all; }
 
   .pm-page .pm-window {
-    background: var(--charcoal);
     width: 100%; height: 100%;
     display: flex; flex-direction: column;
     overflow: hidden;
   }
 
   .pm-header {
-    padding: 16px 24px;
+    padding: 14px 24px;
     border-bottom: 1px solid var(--charcoal-3);
     display: flex; align-items: center; gap: 16px;
     flex-shrink: 0;
@@ -953,101 +952,68 @@
   }
   .pm-back:hover { background: rgba(255,255,255,0.15); }
   .pm-product-name { font-size: 18px; font-weight: 800; color: var(--white); flex: 1; }
-  .pm-post-count { font-size: 11px; color: var(--grey); background: var(--charcoal-3); padding: 3px 10px; border-radius: 10px; }
+  .pm-save-status {
+    font-size: 11px; color: var(--grey-2); background: var(--charcoal-3);
+    padding: 4px 12px; border-radius: 8px; white-space: nowrap;
+    transition: all 0.2s;
+  }
+  .pm-save-status.saving { color: #FFD60A; }
 
   .pm-body {
     flex: 1; overflow-y: auto;
-    padding: 24px;
-    display: flex; flex-direction: column; gap: 20px;
-    max-width: 860px; width: 100%; margin: 0 auto;
-    align-self: center; box-sizing: border-box;
+    display: flex; flex-direction: column;
+    box-sizing: border-box;
   }
   .pm-body::-webkit-scrollbar { width: 4px; }
   .pm-body::-webkit-scrollbar-thumb { background: var(--charcoal-3); border-radius: 2px; }
 
-  .pm-form {
-    background: var(--charcoal-2);
-    border: 1px solid var(--charcoal-3);
-    border-radius: 14px; padding: 18px;
-    flex-shrink: 0;
+  /* 에디터 */
+  .pm-editor {
+    flex: 1; outline: none;
+    padding: 40px clamp(28px, 8vw, 120px);
+    color: var(--white); font-size: 15px; line-height: 1.85;
+    font-family: 'Noto Sans KR','Inter',sans-serif;
+    min-height: 100%;
+    box-sizing: border-box;
+    word-break: break-word;
   }
-  .pm-textarea {
-    width: 100%; min-height: 90px;
-    background: transparent; border: none; outline: none;
-    color: var(--white); font-size: 14px; line-height: 1.7;
-    resize: vertical; font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  .pm-editor:empty::before {
+    content: attr(data-placeholder);
+    color: var(--grey-2);
+    pointer-events: none;
   }
-  .pm-textarea::placeholder { color: var(--grey-2); }
-  .pm-form-row {
-    display: flex; align-items: center; gap: 10px;
-    margin-top: 12px; padding-top: 12px;
-    border-top: 1px solid var(--charcoal-3);
-    flex-wrap: wrap;
-  }
-  .pm-img-label {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 12px; color: var(--grey); cursor: pointer;
-    padding: 7px 14px; border-radius: 8px;
-    border: 1px solid var(--charcoal-3);
-    transition: all 0.15s; white-space: nowrap;
-  }
-  .pm-img-label:hover { border-color: var(--white); color: var(--white); }
-  .pm-img-previews { display: flex; gap: 8px; flex-wrap: wrap; flex: 1; }
-  .pm-img-thumb-wrap { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
-  .pm-img-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; border-radius: 7px; }
-  .pm-img-thumb-del {
-    position: absolute; top: -5px; right: -5px;
-    width: 17px; height: 17px; border-radius: 50%;
-    background: #FF3B30; color: white;
-    font-size: 10px; font-weight: 700; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; line-height: 1;
-  }
-  .pm-submit {
-    margin-left: auto; padding: 8px 22px;
-    background: var(--white); color: var(--charcoal);
-    border: none; border-radius: 9px;
-    font-size: 13px; font-weight: 700; cursor: pointer;
-    font-family: 'Noto Sans KR', 'Inter', sans-serif;
-    transition: opacity 0.15s; white-space: nowrap;
-  }
-  .pm-submit:hover { opacity: 0.82; }
-
-  .pm-posts { display: flex; flex-direction: column; gap: 16px; }
-  .pm-empty { text-align: center; color: var(--grey); font-size: 13px; padding: 48px 0; }
-
-  .pm-post {
-    background: var(--charcoal-2);
-    border: 1px solid var(--charcoal-3);
-    border-radius: 14px; padding: 18px;
-    transition: border-color 0.15s;
-  }
-  .pm-post:hover { border-color: rgba(255,255,255,0.18); }
-  .pm-post-meta {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .pm-post-time { font-size: 11px; color: var(--grey-2); }
-  .pm-post-del {
-    background: none; border: none; color: var(--grey-2);
-    font-size: 13px; cursor: pointer; transition: color 0.15s; padding: 0;
-  }
-  .pm-post-del:hover { color: #FF3B30; }
-  .pm-post-text {
-    font-size: 14px; color: var(--white);
-    line-height: 1.75; white-space: pre-wrap; margin-bottom: 12px;
-  }
-  .pm-post-text:empty { display: none; margin-bottom: 0; }
-  .pm-post-imgs {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 8px; margin-top: 4px;
-  }
-  .pm-post-imgs img {
-    width: 100%; aspect-ratio: 1; object-fit: cover;
-    border-radius: 9px; border: 1px solid var(--charcoal-3);
+  .pm-editor img {
+    max-width: 100%; border-radius: 10px;
+    margin: 12px 0; display: block;
     cursor: zoom-in; transition: opacity 0.15s;
   }
-  .pm-post-imgs img:hover { opacity: 0.82; }
+  .pm-editor img:hover { opacity: 0.85; }
+  .pm-editor h1, .pm-editor h2, .pm-editor h3 {
+    color: var(--white); font-weight: 800; margin: 16px 0 8px;
+  }
+  .pm-editor a { color: #4DA3FF; text-decoration: underline; }
+  .pm-editor ul, .pm-editor ol { padding-left: 24px; margin: 8px 0; }
+  .pm-editor li { margin-bottom: 4px; }
+  .pm-editor blockquote {
+    border-left: 3px solid var(--charcoal-3);
+    padding-left: 16px; margin: 12px 0;
+    color: var(--grey);
+  }
+  /* 드래그 오버 */
+  .pm-editor.drag-over {
+    background: rgba(255,255,255,0.03);
+    outline: 2px dashed rgba(255,255,255,0.25);
+    outline-offset: -8px;
+  }
+  /* 에디터 내 파일 첨부 표시 */
+  .pm-file-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--charcoal-3); border-radius: 8px;
+    padding: 5px 12px; font-size: 12px; color: var(--grey);
+    cursor: pointer; text-decoration: none;
+    margin: 4px 2px; vertical-align: middle;
+  }
+  .pm-file-chip:hover { color: var(--white); }
 
   .pm-zoom-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.93);
@@ -1915,150 +1881,229 @@ const _sb = supabase.createClient(
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var currentProduct = null;
-  var pendingImgs    = [];
+  var currentDocId   = null;
+  var saveTimer      = null;
 
-  var page      = document.getElementById('pmPage');
-  var nameEl    = document.getElementById('pmProductName');
-  var countEl   = document.getElementById('pmPostCount');
-  var textarea  = document.getElementById('pmTextarea');
-  var fileInput = document.getElementById('pmFileInput');
-  var previews  = document.getElementById('pmImgPreviews');
-  var submitBtn = document.getElementById('pmSubmit');
-  var postsEl   = document.getElementById('pmPosts');
-  var zoomOv    = document.getElementById('pmZoomOverlay');
-  var zoomImg   = document.getElementById('pmZoomImg');
+  var page     = document.getElementById('pmPage');
+  var nameEl   = document.getElementById('pmProductName');
+  var statusEl = document.getElementById('pmSaveStatus');
+  var editor   = document.getElementById('pmEditor');
+  var zoomOv   = document.getElementById('pmZoomOverlay');
+  var zoomImg  = document.getElementById('pmZoomImg');
 
-  async function loadPosts() {
-    if (!currentProduct) return [];
+  /* ── DB helpers ── */
+  async function loadDoc(productKey) {
     var res = await _sb.from('product_posts')
       .select('*')
-      .eq('product_key', currentProduct)
-      .order('created_at', { ascending: false });
-    return res.data || [];
+      .eq('product_key', productKey)
+      .order('created_at', { ascending: true })
+      .limit(1);
+    if (res.data && res.data.length) return res.data[0];
+    /* 없으면 생성 */
+    var ins = await _sb.from('product_posts')
+      .insert({ product_key: productKey, content: '', files: [] })
+      .select()
+      .single();
+    return ins.data;
   }
 
-  function openPage(productName) {
+  async function saveDoc() {
+    if (!currentDocId) return;
+    statusEl.textContent = '\uc800\uc7a5 \uc911...';
+    statusEl.classList.add('saving');
+    var html = editor.innerHTML;
+    await _sb.from('product_posts')
+      .update({ content: html, updated_at: new Date().toISOString() })
+      .eq('id', currentDocId);
+    statusEl.textContent = '\uc800\uc7a5\ub428';
+    statusEl.classList.remove('saving');
+  }
+
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    statusEl.textContent = '\uc218\uc815 \uc911...';
+    statusEl.classList.add('saving');
+    saveTimer = setTimeout(saveDoc, 800);
+  }
+
+  /* ── 열기/닫기 ── */
+  async function openPage(productName) {
     currentProduct = productName;
-    pendingImgs    = [];
-    previews.innerHTML = '';
-    textarea.value = '';
     nameEl.textContent = productName;
-    renderPosts();
+    editor.innerHTML = '';
+    statusEl.textContent = '\uBD88\uB7EC\uC624\uB294 \uC911...';
+    statusEl.classList.add('saving');
     page.classList.add('open');
     document.body.style.overflow = 'hidden';
     history.pushState({ page: 'product' }, '');
+
+    var doc = await loadDoc(productName);
+    currentDocId = doc.id;
+    editor.innerHTML = doc.content || '';
+    statusEl.textContent = '\uc800\uc7a5\ub428';
+    statusEl.classList.remove('saving');
+    editor.focus();
+    bindEditorImages();
   }
 
   function closePage() {
+    /* 닫기 전 즉시 저장 */
+    clearTimeout(saveTimer);
+    if (currentDocId && editor.innerHTML) saveDoc();
     page.classList.remove('open');
     document.body.style.overflow = '';
     currentProduct = null;
+    currentDocId = null;
   }
 
-  document.getElementById('pmBack').addEventListener('click', closePage);
-
-  fileInput.addEventListener('change', function () {
-    Array.from(fileInput.files).forEach(function (file) {
-      var reader = new FileReader();
-      reader.onload = function (e) {
-        pendingImgs.push(e.target.result);
-        renderPreviews();
-      };
-      reader.readAsDataURL(file);
-    });
-    fileInput.value = '';
+  document.getElementById('pmBack').addEventListener('click', function() {
+    closePage();
+    if (history.state && history.state.page === 'product') history.back();
   });
 
-  function renderPreviews() {
-    previews.innerHTML = '';
-    pendingImgs.forEach(function (src, i) {
-      var wrap = document.createElement('div');
-      wrap.className = 'pm-img-thumb-wrap';
-      var img = document.createElement('img');
-      img.src = src;
-      var del = document.createElement('button');
-      del.className = 'pm-img-thumb-del';
-      del.textContent = '\u00d7';
-      del.onclick = function () { pendingImgs.splice(i, 1); renderPreviews(); };
-      wrap.appendChild(img);
-      wrap.appendChild(del);
-      previews.appendChild(wrap);
-    });
-  }
+  /* ── 에디터 이벤트 ── */
+  editor.addEventListener('input', scheduleSave);
 
-  submitBtn.addEventListener('click', async function () {
-    var text = textarea.value.trim();
-    if (!text && pendingImgs.length === 0) return;
-    await _sb.from('product_posts').insert({
-      product_key: currentProduct,
-      content: text,
-      files: pendingImgs.slice()
-    });
-    textarea.value = '';
-    pendingImgs = [];
-    previews.innerHTML = '';
-    await renderPosts();
-  });
-
-  function esc(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
-  }
-
-  async function renderPosts() {
-    var posts = await loadPosts();
-    countEl.textContent = posts.length + '\uAC1C';
-    if (!posts.length) {
-      postsEl.innerHTML = '<div class="pm-empty">\uC544\uC9C1 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.<br>\uCCAB \uBC88\uC9F8 \uAE30\uB85D\uC744 \uB0A8\uACA8\uBCF4\uC138\uC694.</div>';
-      return;
-    }
-    postsEl.innerHTML = posts.map(function (post) {
-      var imgs = (post.files && post.files.length)
-        ? '<div class="pm-post-imgs">' +
-          post.files.map(function (s) { return '<img src="' + s + '" data-zoom="' + s + '">'; }).join('') +
-          '</div>' : '';
-      var time = post.created_at ? new Date(post.created_at).toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
-      return '<div class="pm-post">'
-        + '<div class="pm-post-meta">'
-        + '<span class="pm-post-time">' + time + '</span>'
-        + '<button class="pm-post-del" data-id="' + post.id + '">\uC0AD\uC81C</button>'
-        + '</div>'
-        + (post.content ? '<div class="pm-post-text">' + esc(post.content) + '</div>' : '')
-        + imgs + '</div>';
-    }).join('');
-
-    postsEl.querySelectorAll('.pm-post-del').forEach(function (btn) {
-      btn.addEventListener('click', async function () {
-        await _sb.from('product_posts').delete().eq('id', parseInt(btn.dataset.id));
-        await renderPosts();
-      });
-    });
-
-    postsEl.querySelectorAll('[data-zoom]').forEach(function (img) {
-      img.addEventListener('click', function () {
-        zoomImg.src = img.dataset.zoom;
+  /* 이미지 클릭 줌 */
+  function bindEditorImages() {
+    editor.querySelectorAll('img').forEach(function(img) {
+      if (img.dataset.zoomBound) return;
+      img.dataset.zoomBound = '1';
+      img.addEventListener('click', function(e) {
+        e.preventDefault();
+        zoomImg.src = img.src;
         zoomOv.classList.add('open');
       });
     });
   }
 
+  /* MutationObserver로 새 이미지에 줌 바인딩 */
+  var observer = new MutationObserver(function() { bindEditorImages(); });
+
+  /* ── 드래그 앤 드롭 ── */
+  editor.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    editor.classList.add('drag-over');
+  });
+  editor.addEventListener('dragleave', function(e) {
+    if (!editor.contains(e.relatedTarget)) editor.classList.remove('drag-over');
+  });
+  editor.addEventListener('drop', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    editor.classList.remove('drag-over');
+    var files = Array.from(e.dataTransfer.files);
+    if (!files.length) return;
+    files.forEach(function(file) {
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        if (file.type.startsWith('image/')) {
+          /* 이미지: 인라인 삽입 */
+          var img = document.createElement('img');
+          img.src = ev.target.result;
+          img.style.maxWidth = '100%';
+          insertAtCursor(img);
+        } else {
+          /* 파일: 칩으로 삽입 */
+          var chip = document.createElement('a');
+          chip.className = 'pm-file-chip';
+          chip.href = ev.target.result;
+          chip.download = file.name;
+          chip.textContent = '\ud83d\udcce ' + file.name;
+          chip.contentEditable = 'false';
+          insertAtCursor(chip);
+        }
+        scheduleSave();
+      };
+      reader.readAsDataURL(file);
+    });
+  });
+
+  /* 붙여넣기: 이미지 처리 */
+  editor.addEventListener('paste', function(e) {
+    var items = Array.from(e.clipboardData.items);
+    var hasImage = items.some(function(it) { return it.type.startsWith('image/'); });
+    if (hasImage) {
+      e.preventDefault();
+      items.forEach(function(item) {
+        if (item.type.startsWith('image/')) {
+          var file = item.getAsFile();
+          var reader = new FileReader();
+          reader.onload = function(ev) {
+            var img = document.createElement('img');
+            img.src = ev.target.result;
+            img.style.maxWidth = '100%';
+            insertAtCursor(img);
+            scheduleSave();
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+    /* 텍스트 붙여넣기는 기본 동작 허용 */
+  });
+
+  function insertAtCursor(node) {
+    editor.focus();
+    var sel = window.getSelection();
+    if (sel.rangeCount) {
+      var range = sel.getRangeAt(0);
+      range.collapse(false);
+      range.insertNode(node);
+      /* 커서를 노드 뒤로 이동 */
+      range.setStartAfter(node);
+      range.setEndAfter(node);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      /* 줄바꿈 추가 */
+      var br = document.createElement('br');
+      range.insertNode(br);
+      range.setStartAfter(br);
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } else {
+      editor.appendChild(node);
+      editor.appendChild(document.createElement('br'));
+    }
+  }
+
+  /* ── 이미지 줌 닫기 ── */
   zoomOv.addEventListener('click', function () {
     zoomOv.classList.remove('open');
     zoomImg.src = '';
   });
 
+  /* ── 제품 카드 클릭 ── */
   document.querySelectorAll('.products-grid .product-card').forEach(function (card) {
     var name = card.querySelector('.product-name').textContent.trim();
     card.style.cursor = 'pointer';
     card.addEventListener('click', function () { openPage(name); });
   });
 
+  /* ── 에디터 열릴 때 observer 시작 ── */
+  var pageObserver = new MutationObserver(function() {
+    if (page.classList.contains('open')) {
+      observer.observe(editor, { childList: true, subtree: true });
+    } else {
+      observer.disconnect();
+    }
+  });
+  pageObserver.observe(page, { attributes: true, attributeFilter: ['class'] });
+
+  /* ── Realtime: 다른 사용자 수정 반영 ── */
   _sb.channel('product-rt')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'product_posts' }, async function() {
-      if (currentProduct) await renderPosts();
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'product_posts' }, function(payload) {
+      if (currentDocId && payload.new.id === currentDocId) {
+        /* 현재 편집 중이 아닐 때만 반영 (충돌 방지) */
+        if (!document.hasFocus() || document.activeElement !== editor) {
+          editor.innerHTML = payload.new.content || '';
+          bindEditorImages();
+        }
+      }
     })
     .subscribe();
 });
-
 </script>
 
 <!-- ─── SCRIPT: CONFIRM PAGE ─── -->
@@ -2725,21 +2770,10 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="pm-header">
       <button class="pm-back" id="pmBack">&#8592;</button>
       <div class="pm-product-name" id="pmProductName"></div>
-      <div class="pm-post-count" id="pmPostCount">0개</div>
+      <div class="pm-save-status" id="pmSaveStatus">저장됨</div>
     </div>
     <div class="pm-body">
-      <div class="pm-form">
-        <textarea class="pm-textarea" id="pmTextarea" placeholder="기록을 남겨주세요 — 디자인 메모, 수정 사항, 피드백 등..."></textarea>
-        <div class="pm-form-row">
-          <label class="pm-img-label">
-            ＋ 사진 추가
-            <input type="file" id="pmFileInput" multiple accept="image/*" style="display:none">
-          </label>
-          <div class="pm-img-previews" id="pmImgPreviews"></div>
-          <button class="pm-submit" id="pmSubmit">등록</button>
-        </div>
-      </div>
-      <div class="pm-posts" id="pmPosts"></div>
+      <div class="pm-editor" id="pmEditor" contenteditable="true" data-placeholder="자유롭게 작성하세요 — 텍스트 입력, 이미지 드래그 앤 드롭, 파일 첨부 모두 가능합니다..."></div>
     </div>
   </div>
 </div>
