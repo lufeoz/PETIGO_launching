@@ -967,6 +967,91 @@
   .pm-body::-webkit-scrollbar { width: 4px; }
   .pm-body::-webkit-scrollbar-thumb { background: var(--charcoal-3); border-radius: 2px; }
 
+  /* 페이지 리스트 뷰 */
+  .pm-list-view {
+    flex: 1; overflow-y: auto;
+    padding: 32px clamp(28px, 8vw, 120px);
+    box-sizing: border-box;
+  }
+  .pm-list-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .pm-list-title {
+    font-size: 13px; color: var(--grey-2); font-weight: 600;
+  }
+  .pm-new-page {
+    padding: 8px 18px;
+    background: var(--white); color: var(--charcoal);
+    border: none; border-radius: 9px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: 'Noto Sans KR','Inter',sans-serif;
+    transition: opacity 0.15s;
+  }
+  .pm-new-page:hover { opacity: 0.82; }
+  .pm-page-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+  }
+  .pm-page-card {
+    background: var(--charcoal-2);
+    border: 1px solid var(--charcoal-3);
+    border-radius: 14px; padding: 18px;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; flex-direction: column; gap: 10px;
+    min-height: 120px;
+  }
+  .pm-page-card:hover { border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
+  .pm-page-date {
+    font-size: 14px; font-weight: 800; color: var(--white);
+  }
+  .pm-page-preview {
+    font-size: 12px; color: var(--grey); line-height: 1.6;
+    display: -webkit-box; -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical; overflow: hidden;
+    flex: 1;
+  }
+  .pm-page-card-footer {
+    display: flex; align-items: center; gap: 8px;
+  }
+  .pm-page-time {
+    font-size: 10px; color: var(--grey-2); flex: 1;
+  }
+  .pm-page-del {
+    background: none; border: none; color: var(--grey-2);
+    font-size: 11px; cursor: pointer; padding: 2px 6px;
+    border-radius: 4px; transition: all 0.15s;
+    font-family: 'Noto Sans KR','Inter',sans-serif;
+  }
+  .pm-page-del:hover { color: #FF3B30; background: rgba(255,59,48,0.1); }
+  .pm-page-empty {
+    text-align: center; color: var(--grey); font-size: 13px;
+    padding: 60px 0;
+  }
+  /* 에디터 뷰 */
+  .pm-edit-view { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .pm-edit-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 24px;
+    border-bottom: 1px solid var(--charcoal-3);
+    background: var(--charcoal-2);
+    flex-shrink: 0;
+  }
+  .pm-edit-back {
+    background: var(--charcoal-3); border: none;
+    color: var(--white); font-size: 12px; font-weight: 600;
+    cursor: pointer; padding: 6px 12px; border-radius: 7px;
+    font-family: 'Noto Sans KR','Inter',sans-serif;
+    transition: background 0.15s;
+  }
+  .pm-edit-back:hover { background: rgba(255,255,255,0.15); }
+  .pm-edit-date { font-size: 13px; font-weight: 700; color: var(--white); flex: 1; }
+  .pm-edit-body {
+    flex: 1; overflow-y: auto;
+  }
+  .pm-edit-body::-webkit-scrollbar { width: 4px; }
+  .pm-edit-body::-webkit-scrollbar-thumb { background: var(--charcoal-3); border-radius: 2px; }
+
   /* 에디터 */
   .pm-editor {
     flex: 1; outline: none;
@@ -1923,28 +2008,45 @@ document.addEventListener('DOMContentLoaded', function () {
   var currentProduct = null;
   var currentDocId   = null;
   var saveTimer      = null;
+  var viewMode       = 'list'; /* 'list' or 'edit' */
 
-  var page     = document.getElementById('pmPage');
-  var nameEl   = document.getElementById('pmProductName');
-  var statusEl = document.getElementById('pmSaveStatus');
-  var editor   = document.getElementById('pmEditor');
-  var zoomOv   = document.getElementById('pmZoomOverlay');
-  var zoomImg  = document.getElementById('pmZoomImg');
+  var page       = document.getElementById('pmPage');
+  var nameEl     = document.getElementById('pmProductName');
+  var statusEl   = document.getElementById('pmSaveStatus');
+  var listView   = document.getElementById('pmListView');
+  var editView   = document.getElementById('pmEditView');
+  var editor     = document.getElementById('pmEditor');
+  var pageGrid   = document.getElementById('pmPageGrid');
+  var newPageBtn = document.getElementById('pmNewPage');
+  var editBack   = document.getElementById('pmEditBack');
+  var editDateEl = document.getElementById('pmEditDate');
+  var zoomOv     = document.getElementById('pmZoomOverlay');
+  var zoomImg    = document.getElementById('pmZoomImg');
 
-  /* ── DB helpers ── */
-  async function loadDoc(productKey) {
+  /* ── helpers ── */
+  function fmtDate(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    return d.toLocaleDateString('ko-KR', { year:'numeric', month:'long', day:'numeric' });
+  }
+  function fmtDateTime(ts) {
+    if (!ts) return '';
+    var d = new Date(ts);
+    return d.toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+  }
+  function stripHtml(html) {
+    var tmp = document.createElement('div');
+    tmp.innerHTML = html || '';
+    return tmp.textContent || '';
+  }
+
+  /* ── DB ── */
+  async function loadPages(productKey) {
     var res = await _sb.from('product_posts')
       .select('*')
       .eq('product_key', productKey)
-      .order('created_at', { ascending: true })
-      .limit(1);
-    if (res.data && res.data.length) return res.data[0];
-    /* 없으면 생성 */
-    var ins = await _sb.from('product_posts')
-      .insert({ product_key: productKey, content: '', files: [] })
-      .select()
-      .single();
-    return ins.data;
+      .order('created_at', { ascending: false });
+    return res.data || [];
   }
 
   async function saveDoc() {
@@ -1966,39 +2068,120 @@ document.addEventListener('DOMContentLoaded', function () {
     saveTimer = setTimeout(saveDoc, 800);
   }
 
-  /* ── 열기/닫기 ── */
-  async function openPage(productName) {
-    currentProduct = productName;
-    nameEl.textContent = productName;
-    editor.innerHTML = '';
+  /* ── 리스트 뷰 ── */
+  async function showListView() {
+    viewMode = 'list';
+    listView.style.display = '';
+    editView.style.display = 'none';
+    statusEl.textContent = '';
+    currentDocId = null;
+
+    var pages = await loadPages(currentProduct);
+    if (!pages.length) {
+      pageGrid.innerHTML = '<div class="pm-page-empty">\uc544\uc9c1 \ud398\uc774\uc9c0\uac00 \uc5c6\uc2b5\ub2c8\ub2e4.<br>\uc0c8 \ud398\uc774\uc9c0\ub97c \ub9cc\ub4e4\uc5b4\ubcf4\uc138\uc694!</div>';
+      return;
+    }
+    pageGrid.innerHTML = pages.map(function(p) {
+      var preview = stripHtml(p.content).trim();
+      if (preview.length > 150) preview = preview.slice(0, 150) + '\u2026';
+      return '<div class="pm-page-card" data-id="' + p.id + '" data-date="' + (p.created_at||'') + '">'
+        + '<div class="pm-page-date">' + fmtDate(p.created_at) + '</div>'
+        + '<div class="pm-page-preview">' + (preview || '\ube48 \ud398\uc774\uc9c0') + '</div>'
+        + '<div class="pm-page-card-footer">'
+        + '<span class="pm-page-time">' + fmtDateTime(p.updated_at || p.created_at) + ' \uc218\uc815</span>'
+        + '<button class="pm-page-del" data-id="' + p.id + '">\uc0ad\uc81c</button>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    /* 카드 클릭 → 에디터 */
+    pageGrid.querySelectorAll('.pm-page-card').forEach(function(card) {
+      card.addEventListener('click', function(e) {
+        if (e.target.classList.contains('pm-page-del')) return;
+        openEditor(parseInt(card.dataset.id), card.dataset.date);
+      });
+    });
+
+    /* 삭제 */
+    pageGrid.querySelectorAll('.pm-page-del').forEach(function(btn) {
+      btn.addEventListener('click', async function(e) {
+        e.stopPropagation();
+        if (!confirm('\uc774 \ud398\uc774\uc9c0\ub97c \uc0ad\uc81c\ud560\uae4c\uc694?')) return;
+        await _sb.from('product_posts').delete().eq('id', parseInt(btn.dataset.id));
+        await showListView();
+      });
+    });
+  }
+
+  /* ── 에디터 뷰 ── */
+  async function openEditor(docId, dateStr) {
+    viewMode = 'edit';
+    currentDocId = docId;
+    listView.style.display = 'none';
+    editView.style.display = '';
+    editDateEl.textContent = fmtDate(dateStr);
     statusEl.textContent = '\uBD88\uB7EC\uC624\uB294 \uC911...';
     statusEl.classList.add('saving');
-    page.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    history.pushState({ page: 'product' }, '');
 
-    var doc = await loadDoc(productName);
-    currentDocId = doc.id;
-    editor.innerHTML = doc.content || '';
+    var res = await _sb.from('product_posts').select('*').eq('id', docId).single();
+    var doc = res.data;
+    editor.innerHTML = (doc && doc.content) || '';
     statusEl.textContent = '\uc800\uc7a5\ub428';
     statusEl.classList.remove('saving');
     editor.focus();
     bindEditorImages();
   }
 
-  function closePage() {
-    /* 닫기 전 즉시 저장 */
+  /* ── 새 페이지 생성 ── */
+  newPageBtn.addEventListener('click', async function() {
+    var res = await _sb.from('product_posts')
+      .insert({ product_key: currentProduct, content: '', files: [] })
+      .select()
+      .single();
+    if (res.data) {
+      openEditor(res.data.id, res.data.created_at);
+    }
+  });
+
+  /* ── 에디터 → 리스트 돌아가기 ── */
+  editBack.addEventListener('click', function() {
     clearTimeout(saveTimer);
-    if (currentDocId && editor.innerHTML) saveDoc();
+    if (currentDocId) saveDoc();
+    showListView();
+  });
+
+  /* ── 페이지 열기/닫기 ── */
+  function openPage(productName) {
+    currentProduct = productName;
+    nameEl.textContent = productName;
+    showListView();
+    page.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    history.pushState({ page: 'product' }, '');
+  }
+
+  function closePage() {
+    clearTimeout(saveTimer);
+    if (currentDocId) saveDoc();
     page.classList.remove('open');
     document.body.style.overflow = '';
     currentProduct = null;
     currentDocId = null;
+    viewMode = 'list';
+    listView.style.display = '';
+    editView.style.display = 'none';
   }
 
   document.getElementById('pmBack').addEventListener('click', function() {
-    closePage();
-    if (history.state && history.state.page === 'product') history.back();
+    if (viewMode === 'edit') {
+      /* 에디터에서 → 리스트로 */
+      clearTimeout(saveTimer);
+      if (currentDocId) saveDoc();
+      showListView();
+    } else {
+      closePage();
+      if (history.state && history.state.page === 'product') history.back();
+    }
   });
 
   /* ── 에디터 이벤트 ── */
@@ -2008,7 +2191,7 @@ document.addEventListener('DOMContentLoaded', function () {
   var activeWrap = null;
 
   function wrapImage(img) {
-    if (img.closest('.pm-img-wrap')) return; /* 이미 래핑됨 */
+    if (img.closest('.pm-img-wrap')) return;
     var wrap = document.createElement('div');
     wrap.className = 'pm-img-wrap';
     wrap.contentEditable = 'false';
@@ -2032,15 +2215,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function bindWrapEvents(wrap) {
     var img = wrap.querySelector('img');
     var handle = wrap.querySelector('.pm-img-resize');
-
-    /* 클릭: 선택/해제 */
     wrap.addEventListener('click', function(e) {
       e.stopPropagation();
       if (e.target.tagName === 'BUTTON') return;
       selectWrap(wrap);
     });
-
-    /* 사이즈 버튼 */
     wrap.querySelectorAll('.pm-img-size').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
         e.stopPropagation();
@@ -2048,32 +2227,23 @@ document.addEventListener('DOMContentLoaded', function () {
         scheduleSave();
       });
     });
-
-    /* 줌 */
     wrap.querySelector('.pm-img-zoom').addEventListener('click', function(e) {
       e.stopPropagation();
       zoomImg.src = img.src;
       zoomOv.classList.add('open');
     });
-
-    /* 삭제 */
     wrap.querySelector('.pm-img-del').addEventListener('click', function(e) {
       e.stopPropagation();
       wrap.remove();
       activeWrap = null;
       scheduleSave();
     });
-
-    /* 리사이즈 드래그 */
     handle.addEventListener('mousedown', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      var startX = e.clientX;
-      var startW = img.offsetWidth;
+      e.preventDefault(); e.stopPropagation();
+      var startX = e.clientX, startW = img.offsetWidth;
       function onMove(ev) {
-        var newW = Math.max(60, startW + (ev.clientX - startX));
-        var maxW = editor.offsetWidth - 40;
-        img.style.width = Math.min(newW, maxW) + 'px';
+        var nw = Math.max(60, startW + (ev.clientX - startX));
+        img.style.width = Math.min(nw, editor.offsetWidth - 40) + 'px';
       }
       function onUp() {
         document.removeEventListener('mousemove', onMove);
@@ -2083,17 +2253,12 @@ document.addEventListener('DOMContentLoaded', function () {
       document.addEventListener('mousemove', onMove);
       document.addEventListener('mouseup', onUp);
     });
-
-    /* 터치 리사이즈 */
     handle.addEventListener('touchstart', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      var startX = e.touches[0].clientX;
-      var startW = img.offsetWidth;
+      e.preventDefault(); e.stopPropagation();
+      var startX = e.touches[0].clientX, startW = img.offsetWidth;
       function onMove(ev) {
-        var newW = Math.max(60, startW + (ev.touches[0].clientX - startX));
-        var maxW = editor.offsetWidth - 40;
-        img.style.width = Math.min(newW, maxW) + 'px';
+        var nw = Math.max(60, startW + (ev.touches[0].clientX - startX));
+        img.style.width = Math.min(nw, editor.offsetWidth - 40) + 'px';
       }
       function onEnd() {
         document.removeEventListener('touchmove', onMove);
@@ -2111,7 +2276,6 @@ document.addEventListener('DOMContentLoaded', function () {
     wrap.classList.add('selected');
   }
 
-  /* 에디터 외부 클릭 시 선택 해제 */
   document.addEventListener('click', function(e) {
     if (activeWrap && !activeWrap.contains(e.target)) {
       activeWrap.classList.remove('selected');
@@ -2119,11 +2283,9 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  /* Delete/Backspace로 선택된 이미지 삭제 */
   document.addEventListener('keydown', function(e) {
     if (activeWrap && (e.key === 'Delete' || e.key === 'Backspace')) {
       if (document.activeElement === editor || activeWrap.contains(document.activeElement)) {
-        /* 에디터 내 텍스트 편집 중이 아닐 때만 */
         if (window.getSelection().isCollapsed || activeWrap.classList.contains('selected')) {
           e.preventDefault();
           activeWrap.remove();
@@ -2135,26 +2297,21 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   function bindEditorImages() {
-    editor.querySelectorAll('img').forEach(function(img) {
-      wrapImage(img);
-    });
+    editor.querySelectorAll('img').forEach(function(img) { wrapImage(img); });
   }
 
-  /* MutationObserver로 새 이미지에 래핑 */
   var observer = new MutationObserver(function() { bindEditorImages(); });
 
   /* ── 드래그 앤 드롭 ── */
   editor.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault(); e.stopPropagation();
     editor.classList.add('drag-over');
   });
   editor.addEventListener('dragleave', function(e) {
     if (!editor.contains(e.relatedTarget)) editor.classList.remove('drag-over');
   });
   editor.addEventListener('drop', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
+    e.preventDefault(); e.stopPropagation();
     editor.classList.remove('drag-over');
     var files = Array.from(e.dataTransfer.files);
     if (!files.length) return;
@@ -2162,13 +2319,11 @@ document.addEventListener('DOMContentLoaded', function () {
       var reader = new FileReader();
       reader.onload = function(ev) {
         if (file.type.startsWith('image/')) {
-          /* 이미지: 인라인 삽입 */
           var img = document.createElement('img');
           img.src = ev.target.result;
           img.style.maxWidth = '100%';
           insertAtCursor(img);
         } else {
-          /* 파일: 칩으로 삽입 */
           var chip = document.createElement('a');
           chip.className = 'pm-file-chip';
           chip.href = ev.target.result;
@@ -2183,7 +2338,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  /* 붙여넣기: 이미지 처리 */
   editor.addEventListener('paste', function(e) {
     var items = Array.from(e.clipboardData.items);
     var hasImage = items.some(function(it) { return it.type.startsWith('image/'); });
@@ -2204,7 +2358,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       });
     }
-    /* 텍스트 붙여넣기는 기본 동작 허용 */
   });
 
   function insertAtCursor(node) {
@@ -2214,12 +2367,10 @@ document.addEventListener('DOMContentLoaded', function () {
       var range = sel.getRangeAt(0);
       range.collapse(false);
       range.insertNode(node);
-      /* 커서를 노드 뒤로 이동 */
       range.setStartAfter(node);
       range.setEndAfter(node);
       sel.removeAllRanges();
       sel.addRange(range);
-      /* 줄바꿈 추가 */
       var br = document.createElement('br');
       range.insertNode(br);
       range.setStartAfter(br);
@@ -2231,22 +2382,22 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  /* ── 이미지 줌 닫기 ── */
+  /* ── 줌 닫기 ── */
   zoomOv.addEventListener('click', function () {
     zoomOv.classList.remove('open');
     zoomImg.src = '';
   });
 
-  /* ── 제품 카드 클릭 ── */
+  /* ── 카드 클릭 연결 ── */
   document.querySelectorAll('.products-grid .product-card').forEach(function (card) {
     var name = card.querySelector('.product-name').textContent.trim();
     card.style.cursor = 'pointer';
     card.addEventListener('click', function () { openPage(name); });
   });
 
-  /* ── 에디터 열릴 때 observer 시작 ── */
+  /* ── observer ── */
   var pageObserver = new MutationObserver(function() {
-    if (page.classList.contains('open')) {
+    if (page.classList.contains('open') && viewMode === 'edit') {
       observer.observe(editor, { childList: true, subtree: true });
     } else {
       observer.disconnect();
@@ -2254,11 +2405,11 @@ document.addEventListener('DOMContentLoaded', function () {
   });
   pageObserver.observe(page, { attributes: true, attributeFilter: ['class'] });
 
-  /* ── Realtime: 다른 사용자 수정 반영 ── */
+  /* ── Realtime ── */
   _sb.channel('product-rt')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'product_posts' }, function(payload) {
-      if (currentDocId && payload.new.id === currentDocId) {
-        /* 현재 편집 중이 아닐 때만 반영 (충돌 방지) */
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'product_posts' }, function(payload) {
+      if (viewMode === 'list' && currentProduct) showListView();
+      if (viewMode === 'edit' && currentDocId && payload.new && payload.new.id === currentDocId) {
         if (!document.hasFocus() || document.activeElement !== editor) {
           editor.innerHTML = payload.new.content || '';
           bindEditorImages();
@@ -2933,10 +3084,25 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="pm-header">
       <button class="pm-back" id="pmBack">&#8592;</button>
       <div class="pm-product-name" id="pmProductName"></div>
-      <div class="pm-save-status" id="pmSaveStatus">저장됨</div>
+      <div class="pm-save-status" id="pmSaveStatus"></div>
     </div>
-    <div class="pm-body">
-      <div class="pm-editor" id="pmEditor" contenteditable="true" data-placeholder="자유롭게 작성하세요 — 텍스트 입력, 이미지 드래그 앤 드롭, 파일 첨부 모두 가능합니다..."></div>
+    <!-- 페이지 리스트 뷰 -->
+    <div class="pm-list-view" id="pmListView">
+      <div class="pm-list-header">
+        <div class="pm-list-title">페이지 목록</div>
+        <button class="pm-new-page" id="pmNewPage">+ 새 페이지</button>
+      </div>
+      <div class="pm-page-grid" id="pmPageGrid"></div>
+    </div>
+    <!-- 에디터 뷰 -->
+    <div class="pm-edit-view" id="pmEditView" style="display:none">
+      <div class="pm-edit-header">
+        <button class="pm-edit-back" id="pmEditBack">&#8592; 목록</button>
+        <div class="pm-edit-date" id="pmEditDate"></div>
+      </div>
+      <div class="pm-edit-body">
+        <div class="pm-editor" id="pmEditor" contenteditable="true" data-placeholder="자유롭게 작성하세요 — 텍스트 입력, 이미지 드래그 앤 드롭, 파일 첨부 모두 가능합니다..."></div>
+      </div>
     </div>
   </div>
 </div>
