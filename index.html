@@ -897,6 +897,44 @@
   .pm-zoom-overlay.open { display: flex; }
   .pm-zoom-overlay img { max-width: 92vw; max-height: 92vh; border-radius: 8px; }
 
+  /* ───── MILESTONE FULL PAGE ───── */
+  #milestoneBanner:hover { opacity: 0.85; }
+
+  .ms-page {
+    position: fixed; inset: 0;
+    background: var(--charcoal);
+    z-index: 2000;
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.18s ease;
+    overflow: hidden;
+  }
+  .ms-page.open { opacity: 1; pointer-events: all; }
+
+  .ms-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--charcoal-3);
+    background: var(--charcoal-2);
+    flex-shrink: 0;
+  }
+  .ms-back {
+    background: var(--charcoal-3); border: none;
+    color: var(--white); font-size: 13px; font-weight: 600;
+    cursor: pointer; padding: 7px 14px; border-radius: 8px;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+    transition: background 0.15s; white-space: nowrap;
+  }
+  .ms-back:hover { background: rgba(255,255,255,0.15); }
+  .ms-title { font-size: 15px; font-weight: 800; color: var(--white); letter-spacing: 2px; }
+
+  .ms-body {
+    flex: 1; overflow-y: auto;
+    padding: 32px 24px;
+  }
+  .ms-body::-webkit-scrollbar { width: 4px; }
+  .ms-body::-webkit-scrollbar-thumb { background: var(--charcoal-3); border-radius: 2px; }
+
   /* ───── FOOTER ───── */
   .footer {
     text-align: center;
@@ -969,7 +1007,7 @@
 </div>
 
 <!-- ─── MILESTONES BANNER ─── -->
-<div class="critical-banner">
+<div class="critical-banner" id="milestoneBanner" style="cursor:pointer;" title="클릭하여 전체 현황 보기">
   <div class="critical-label">MILESTONES</div>
   <div class="path-row">
     <div class="path-item done">✅ 1차 시안 납품<br><small>3/27</small></div>
@@ -1304,335 +1342,7 @@
   </div>
 </div>
 
-<!-- ─── ROADMAP TABLE ─── -->
-<div class="section-title">ROADMAP — 월별 업무 타임라인</div>
-<div class="roadmap-wrap">
-  <table class="roadmap-table">
-    <thead>
-      <tr>
-        <th style="text-align:left; min-width:200px;">작업 항목</th>
-        <th class="month-now">3월<br><small>▼ NOW</small></th>
-        <th>4월</th>
-        <th>5월</th>
-        <th>6월</th>
-        <th>7월</th>
-        <th>8월</th>
-        <th>9월</th>
-        <th>10월</th>
-        <th>11월</th>
-      </tr>
-    </thead>
-    <tbody>
-      <!-- 디자이너 섹션 -->
-      <tr>
-        <td class="task-name-cell" colspan="10" style="padding-top:14px; padding-bottom:4px;">
-          <span class="cat-label cat-designer">전실장</span> 제품 디자이너 업무
-        </td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">✅ 1차 시안 3종 납품 (패딩 필수)</td>
-        <td><div class="cell-bar bar-done">완료</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">🔥 1차 피드백 반영 & 시안 확정</td>
-        <td></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">원단 시장 방문 & 스펙 검토</td>
-        <td><div class="cell-bar bar-designer" style="font-size:9px;">진행중</div></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">2차 배치 시안 & 테크팩 착수</td>
-        <td></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">패키지·행택 디자인 확정</td>
-        <td></td>
-        <td></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">샘플 검수 & 디테일 점검</td>
-        <td></td><td></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">제품 촬영 지원 (유실장 협업)</td>
-        <td></td><td></td><td></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">SNS 비주얼 & PR 키트 소재 제작</td>
-        <td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">완제품 최종 퀄리티 점검</td>
-        <td></td><td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-designer">전실장</div></td>
-        <td></td><td></td><td></td>
-      </tr>
-
-      <!-- 마케터 섹션 -->
-      <tr>
-        <td class="task-name-cell" colspan="10" style="padding-top:18px; padding-bottom:4px;">
-          <span class="cat-label cat-marketer">유실장</span> 브랜드 마케터 업무
-        </td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">🔥 로고 시안 공유</td>
-        <td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">브랜드 컬러 가이드 & 타이포 확정</td>
-        <td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">브랜드 보이스 & 슬로건 확정</td>
-        <td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">상세페이지 구성 기획 & 카피 초안</td>
-        <td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">촬영 무드보드 & 방향성 기획</td>
-        <td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">제품 촬영 기획 & 실행 (전실장 협업)</td>
-        <td></td><td></td><td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">상세페이지 디자인 & 제작 (8종)</td>
-        <td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">스마트스토어 세팅 & 상품 등록</td>
-        <td></td><td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">SNS 채널 개설 & 콘텐츠 발행</td>
-        <td></td><td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">인플루언서 공구 모델 컨택 & 계약</td>
-        <td></td><td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">네이버 쇼핑광고 & 론칭 마케팅 ON</td>
-        <td></td><td></td><td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-        <td><div class="cell-bar bar-marketer">유실장</div></td>
-      </tr>
-
-      <!-- 생산팀 섹션 -->
-      <tr>
-        <td class="task-name-cell" colspan="10" style="padding-top:18px; padding-bottom:4px;">
-          <span class="cat-label cat-production">생산팀</span> 미얀마 + 중국 소싱 업무
-        </td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">원단·부자재 소싱 견적 & 샘플 발주</td>
-        <td><div class="cell-bar bar-production" style="font-size:9px;">착수</div></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">1차 샘플 제작 착수 (미얀마)</td>
-        <td></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">샘플 검수 & 최종 승인</td>
-        <td></td><td></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">⚠️ 본 생산 착수 + 패키지 발주</td>
-        <td></td><td></td><td></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td></td><td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">생산 현황 관리 & 중간 QC</td>
-        <td></td><td></td><td></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td></td><td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">완제품 출고 & 한국 입고 QC</td>
-        <td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td></td><td></td><td></td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">물류센터 입고 & 배송 세팅</td>
-        <td></td><td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td><div class="cell-bar bar-production">생산팀</div></td>
-        <td></td><td></td>
-      </tr>
-
-      <!-- 전체 -->
-      <tr>
-        <td class="task-name-cell" colspan="10" style="padding-top:18px; padding-bottom:4px;">
-          <span class="cat-label cat-all">전체</span> 공동 마일스톤
-        </td>
-      </tr>
-      <tr>
-        <td class="task-name-cell">🚀 PETIGO 스마트스토어 론칭 & 광고 ON</td>
-        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-        <td><div class="cell-bar bar-all">🚀 전체</div></td>
-        <td><div class="cell-bar bar-all">🚀 전체</div></td>
-      </tr>
-    </tbody>
-  </table>
-
-  <div class="legend-row">
-    <div class="legend-item"><div class="legend-dot" style="background:#FF6B9D;"></div>전실장 (디자이너)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#34C759;"></div>유실장 (마케터)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#0A84FF;"></div>생산팀 (미얀마·중국)</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#8E8E93;"></div>전체 공동</div>
-    <div class="legend-item"><div class="legend-dot" style="background:#34C759;"></div>완료</div>
-  </div>
-</div>
-
-<!-- ─── STAT CARDS ─── -->
-<div class="section-title">PROJECT STATUS</div>
-<div class="stats-row">
-  <div class="stat-card">
-    <div class="stat-label">론칭까지 남은 기간</div>
-    <div class="stat-value">197</div>
-    <div class="stat-unit">일 (약 6.5개월)</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">1차 제품 라인업</div>
-    <div class="stat-value">8</div>
-    <div class="stat-unit">종 (기어 5 + 어패럴 3)</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">F/W 핵심 선행 제품</div>
-    <div class="stat-value">3</div>
-    <div class="stat-unit">종 (패딩 · 경량패딩 · 후리스)</div>
-  </div>
-  <div class="stat-card">
-    <div class="stat-label">목표 가격대</div>
-    <div class="stat-value">1~4</div>
-    <div class="stat-unit">만원대 · 경쟁사 대비 1/3</div>
-  </div>
-</div>
-
-<!-- ─── MILESTONE ─── -->
-<div class="milestones-wrap">
-  <div class="section-title">MILESTONES</div>
-  <div class="milestone-row">
-    <div class="milestone-item past">
-      <div class="milestone-check">✅</div>
-      <div class="milestone-date past-date">3월 27일</div>
-      <div class="milestone-name">1차 시안 3종 납품<br>(패딩 필수 포함)</div>
-    </div>
-    <div class="milestone-item current">
-      <div class="milestone-check">🔥</div>
-      <div class="milestone-date">4월 초</div>
-      <div class="milestone-name">1차 피드백<br>& 2차 배치 결정</div>
-    </div>
-    <div class="milestone-item">
-      <div class="milestone-check">📐</div>
-      <div class="milestone-date">4월 중순</div>
-      <div class="milestone-name">테크팩 전달<br>+ 샘플 발주</div>
-    </div>
-    <div class="milestone-item">
-      <div class="milestone-check">🎨</div>
-      <div class="milestone-date">4월 말</div>
-      <div class="milestone-name">로고 & 컬러 가이드<br>확정 · 전달</div>
-    </div>
-    <div class="milestone-item">
-      <div class="milestone-check">📦</div>
-      <div class="milestone-date">5월 초</div>
-      <div class="milestone-name">패키지 디자인<br>시안 완성</div>
-    </div>
-    <div class="milestone-item">
-      <div class="milestone-check">✔️</div>
-      <div class="milestone-date">6월 초</div>
-      <div class="milestone-name">최종 샘플 승인</div>
-    </div>
-    <div class="milestone-item">
-      <div class="milestone-check">🏭</div>
-      <div class="milestone-date">6월 중순</div>
-      <div class="milestone-name">본 생산 발주<br>+ 패키지 인쇄 동시</div>
-    </div>
-    <div class="milestone-item">
-      <div class="milestone-check">📬</div>
-      <div class="milestone-date">8월 초</div>
-      <div class="milestone-name">완제품 입고<br>& 최종 QC</div>
-    </div>
-    <div class="milestone-item">
-      <div class="milestone-check">🛍️</div>
-      <div class="milestone-date">8월 말</div>
-      <div class="milestone-name">스마트스토어<br>오픈 준비 완료</div>
-    </div>
-    <div class="milestone-item">
-      <div class="milestone-check">📱</div>
-      <div class="milestone-date">8~9월</div>
-      <div class="milestone-name">SNS 채널 개설<br>& 콘텐츠 시작</div>
-    </div>
-    <div class="milestone-item">
-      <div class="milestone-check">🚀</div>
-      <div class="milestone-date">10~11월</div>
-      <div class="milestone-name">PETIGO<br>공식 론칭</div>
-    </div>
-  </div>
-</div>
-
-<!-- ─── STRATEGY NOTES ─── -->
+<!-- roadmap-moved --><!-- stat-moved --><!-- milestone-moved --><!-- ─── STRATEGY NOTES ─── -->
 <div class="section-title">STRATEGY NOTES — 회의 반영 핵심 결정사항</div>
 <div class="strategy-grid">
   <div class="strategy-card">
@@ -1928,6 +1638,26 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+
+<!-- ─── SCRIPT: MILESTONE PAGE ─── -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var banner = document.getElementById('milestoneBanner');
+  var msPage = document.getElementById('msPage');
+  var msBack = document.getElementById('msBack');
+
+  banner.addEventListener('click', function () {
+    msPage.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  });
+
+  msBack.addEventListener('click', function () {
+    msPage.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+});
+</script>
+
 <!-- ─── SCRIPT: EDITABLE NEXT ACTIONS + CHANGELOG ─── -->
 <script>
 (function () {
@@ -2200,6 +1930,350 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <div class="pm-zoom-overlay" id="pmZoomOverlay">
   <img id="pmZoomImg" src="" alt="">
+</div>
+
+
+<!-- ─── MILESTONE FULL PAGE ─── -->
+<div class="ms-page" id="msPage">
+  <div class="ms-header">
+    <button class="ms-back" id="msBack">&#8592; 돌아가기</button>
+    <div class="ms-title">PROJECT OVERVIEW</div>
+  </div>
+  <div class="ms-body">
+    <!-- ─── STAT CARDS ─── -->
+<div class="section-title">PROJECT STATUS</div>
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-label">론칭까지 남은 기간</div>
+    <div class="stat-value">197</div>
+    <div class="stat-unit">일 (약 6.5개월)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">1차 제품 라인업</div>
+    <div class="stat-value">8</div>
+    <div class="stat-unit">종 (기어 5 + 어패럴 3)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">F/W 핵심 선행 제품</div>
+    <div class="stat-value">3</div>
+    <div class="stat-unit">종 (패딩 · 경량패딩 · 후리스)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">목표 가격대</div>
+    <div class="stat-value">1~4</div>
+    <div class="stat-unit">만원대 · 경쟁사 대비 1/3</div>
+  </div>
+</div>
+
+
+
+    <!-- ─── MILESTONE ─── -->
+<div class="milestones-wrap">
+  <div class="section-title">MILESTONES</div>
+  <div class="milestone-row">
+    <div class="milestone-item past">
+      <div class="milestone-check">✅</div>
+      <div class="milestone-date past-date">3월 27일</div>
+      <div class="milestone-name">1차 시안 3종 납품<br>(패딩 필수 포함)</div>
+    </div>
+    <div class="milestone-item current">
+      <div class="milestone-check">🔥</div>
+      <div class="milestone-date">4월 초</div>
+      <div class="milestone-name">1차 피드백<br>& 2차 배치 결정</div>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-check">📐</div>
+      <div class="milestone-date">4월 중순</div>
+      <div class="milestone-name">테크팩 전달<br>+ 샘플 발주</div>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-check">🎨</div>
+      <div class="milestone-date">4월 말</div>
+      <div class="milestone-name">로고 & 컬러 가이드<br>확정 · 전달</div>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-check">📦</div>
+      <div class="milestone-date">5월 초</div>
+      <div class="milestone-name">패키지 디자인<br>시안 완성</div>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-check">✔️</div>
+      <div class="milestone-date">6월 초</div>
+      <div class="milestone-name">최종 샘플 승인</div>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-check">🏭</div>
+      <div class="milestone-date">6월 중순</div>
+      <div class="milestone-name">본 생산 발주<br>+ 패키지 인쇄 동시</div>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-check">📬</div>
+      <div class="milestone-date">8월 초</div>
+      <div class="milestone-name">완제품 입고<br>& 최종 QC</div>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-check">🛍️</div>
+      <div class="milestone-date">8월 말</div>
+      <div class="milestone-name">스마트스토어<br>오픈 준비 완료</div>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-check">📱</div>
+      <div class="milestone-date">8~9월</div>
+      <div class="milestone-name">SNS 채널 개설<br>& 콘텐츠 시작</div>
+    </div>
+    <div class="milestone-item">
+      <div class="milestone-check">🚀</div>
+      <div class="milestone-date">10~11월</div>
+      <div class="milestone-name">PETIGO<br>공식 론칭</div>
+    </div>
+  </div>
+</div>
+
+
+
+    <!-- ─── ROADMAP TABLE ─── -->
+<div class="section-title">ROADMAP — 월별 업무 타임라인</div>
+<div class="roadmap-wrap">
+  <table class="roadmap-table">
+    <thead>
+      <tr>
+        <th style="text-align:left; min-width:200px;">작업 항목</th>
+        <th class="month-now">3월<br><small>▼ NOW</small></th>
+        <th>4월</th>
+        <th>5월</th>
+        <th>6월</th>
+        <th>7월</th>
+        <th>8월</th>
+        <th>9월</th>
+        <th>10월</th>
+        <th>11월</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- 디자이너 섹션 -->
+      <tr>
+        <td class="task-name-cell" colspan="10" style="padding-top:14px; padding-bottom:4px;">
+          <span class="cat-label cat-designer">전실장</span> 제품 디자이너 업무
+        </td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">✅ 1차 시안 3종 납품 (패딩 필수)</td>
+        <td><div class="cell-bar bar-done">완료</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">🔥 1차 피드백 반영 & 시안 확정</td>
+        <td></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">원단 시장 방문 & 스펙 검토</td>
+        <td><div class="cell-bar bar-designer" style="font-size:9px;">진행중</div></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">2차 배치 시안 & 테크팩 착수</td>
+        <td></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">패키지·행택 디자인 확정</td>
+        <td></td>
+        <td></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">샘플 검수 & 디테일 점검</td>
+        <td></td><td></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">제품 촬영 지원 (유실장 협업)</td>
+        <td></td><td></td><td></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">SNS 비주얼 & PR 키트 소재 제작</td>
+        <td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">완제품 최종 퀄리티 점검</td>
+        <td></td><td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-designer">전실장</div></td>
+        <td></td><td></td><td></td>
+      </tr>
+
+      <!-- 마케터 섹션 -->
+      <tr>
+        <td class="task-name-cell" colspan="10" style="padding-top:18px; padding-bottom:4px;">
+          <span class="cat-label cat-marketer">유실장</span> 브랜드 마케터 업무
+        </td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">🔥 로고 시안 공유</td>
+        <td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">브랜드 컬러 가이드 & 타이포 확정</td>
+        <td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">브랜드 보이스 & 슬로건 확정</td>
+        <td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">상세페이지 구성 기획 & 카피 초안</td>
+        <td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">촬영 무드보드 & 방향성 기획</td>
+        <td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">제품 촬영 기획 & 실행 (전실장 협업)</td>
+        <td></td><td></td><td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">상세페이지 디자인 & 제작 (8종)</td>
+        <td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">스마트스토어 세팅 & 상품 등록</td>
+        <td></td><td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">SNS 채널 개설 & 콘텐츠 발행</td>
+        <td></td><td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">인플루언서 공구 모델 컨택 & 계약</td>
+        <td></td><td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">네이버 쇼핑광고 & 론칭 마케팅 ON</td>
+        <td></td><td></td><td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+        <td><div class="cell-bar bar-marketer">유실장</div></td>
+      </tr>
+
+      <!-- 생산팀 섹션 -->
+      <tr>
+        <td class="task-name-cell" colspan="10" style="padding-top:18px; padding-bottom:4px;">
+          <span class="cat-label cat-production">생산팀</span> 미얀마 + 중국 소싱 업무
+        </td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">원단·부자재 소싱 견적 & 샘플 발주</td>
+        <td><div class="cell-bar bar-production" style="font-size:9px;">착수</div></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">1차 샘플 제작 착수 (미얀마)</td>
+        <td></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">샘플 검수 & 최종 승인</td>
+        <td></td><td></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">⚠️ 본 생산 착수 + 패키지 발주</td>
+        <td></td><td></td><td></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td></td><td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">생산 현황 관리 & 중간 QC</td>
+        <td></td><td></td><td></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td></td><td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">완제품 출고 & 한국 입고 QC</td>
+        <td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td></td><td></td><td></td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">물류센터 입고 & 배송 세팅</td>
+        <td></td><td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td><div class="cell-bar bar-production">생산팀</div></td>
+        <td></td><td></td>
+      </tr>
+
+      <!-- 전체 -->
+      <tr>
+        <td class="task-name-cell" colspan="10" style="padding-top:18px; padding-bottom:4px;">
+          <span class="cat-label cat-all">전체</span> 공동 마일스톤
+        </td>
+      </tr>
+      <tr>
+        <td class="task-name-cell">🚀 PETIGO 스마트스토어 론칭 & 광고 ON</td>
+        <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
+        <td><div class="cell-bar bar-all">🚀 전체</div></td>
+        <td><div class="cell-bar bar-all">🚀 전체</div></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="legend-row">
+    <div class="legend-item"><div class="legend-dot" style="background:#FF6B9D;"></div>전실장 (디자이너)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34C759;"></div>유실장 (마케터)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#0A84FF;"></div>생산팀 (미얀마·중국)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#8E8E93;"></div>전체 공동</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#34C759;"></div>완료</div>
+  </div>
+</div>
+
+
+  </div>
 </div>
 
 <!-- ─── FOOTER ─── -->
