@@ -897,6 +897,187 @@
   .pm-zoom-overlay.open { display: flex; }
   .pm-zoom-overlay img { max-width: 92vw; max-height: 92vh; border-radius: 8px; }
 
+
+  /* ───── CONFIRM HEADER BUTTON ───── */
+  .confirm-btn {
+    display: flex; flex-direction: column; gap: 5px;
+    background: none; border: none; cursor: pointer;
+    text-align: left; padding: 0;
+    transition: opacity 0.15s;
+  }
+  .confirm-btn:hover { opacity: 0.75; }
+  .confirm-label {
+    font-size: 10px; font-weight: 700; color: var(--grey-2);
+    letter-spacing: 1.5px;
+  }
+  .confirm-count {
+    font-size: 28px; font-weight: 800; color: var(--white);
+    line-height: 1;
+  }
+
+  /* ───── CONFIRM FULL PAGE ───── */
+  .cf-page {
+    position: fixed; inset: 0;
+    background: var(--charcoal);
+    z-index: 2000;
+    display: flex; flex-direction: column;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.18s ease;
+    overflow: hidden;
+  }
+  .cf-page.open { opacity: 1; pointer-events: all; }
+
+  .cf-header {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--charcoal-3);
+    background: var(--charcoal-2);
+    flex-shrink: 0;
+  }
+  .cf-back {
+    background: var(--charcoal-3); border: none;
+    color: var(--white); font-size: 13px; font-weight: 600;
+    cursor: pointer; padding: 7px 14px; border-radius: 8px;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+    transition: background 0.15s; white-space: nowrap;
+  }
+  .cf-back:hover { background: rgba(255,255,255,0.15); }
+  .cf-title { font-size: 16px; font-weight: 800; color: var(--white); flex: 1; }
+  .cf-total { font-size: 12px; color: var(--grey); background: var(--charcoal-3); padding: 3px 10px; border-radius: 10px; }
+
+  .cf-body {
+    flex: 1; overflow-y: auto;
+    padding: 24px;
+    display: flex; flex-direction: column; gap: 20px;
+    max-width: 800px; width: 100%; margin: 0 auto;
+    align-self: center; box-sizing: border-box;
+  }
+  .cf-body::-webkit-scrollbar { width: 4px; }
+  .cf-body::-webkit-scrollbar-thumb { background: var(--charcoal-3); border-radius: 2px; }
+
+  /* 작성 폼 */
+  .cf-form {
+    background: var(--charcoal-2);
+    border: 1px solid var(--charcoal-3);
+    border-radius: 14px; padding: 18px;
+    display: flex; flex-direction: column; gap: 10px;
+    flex-shrink: 0;
+  }
+  .cf-input-title {
+    background: transparent; border: none;
+    border-bottom: 1px solid var(--charcoal-3);
+    color: var(--white); font-size: 15px; font-weight: 700;
+    padding: 0 0 10px; outline: none;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  }
+  .cf-input-title::placeholder { color: var(--grey-2); font-weight: 400; }
+  .cf-input-body {
+    background: transparent; border: none; outline: none;
+    color: var(--white); font-size: 13px; line-height: 1.7;
+    resize: vertical; min-height: 70px;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  }
+  .cf-input-body::placeholder { color: var(--grey-2); }
+  .cf-form-row {
+    display: flex; align-items: center; gap: 10px;
+    padding-top: 10px; border-top: 1px solid var(--charcoal-3);
+  }
+  .cf-priority-sel {
+    background: var(--charcoal-3); border: none;
+    color: var(--white); font-size: 12px; padding: 6px 10px;
+    border-radius: 8px; cursor: pointer;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  }
+  .cf-submit {
+    margin-left: auto; padding: 8px 22px;
+    background: var(--white); color: var(--charcoal);
+    border: none; border-radius: 9px;
+    font-size: 13px; font-weight: 700; cursor: pointer;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+    transition: opacity 0.15s;
+  }
+  .cf-submit:hover { opacity: 0.82; }
+
+  /* 게시글 */
+  .cf-posts { display: flex; flex-direction: column; gap: 14px; }
+  .cf-empty { text-align: center; color: var(--grey); font-size: 13px; padding: 48px 0; }
+
+  .cf-post {
+    background: var(--charcoal-2);
+    border: 1px solid var(--charcoal-3);
+    border-radius: 14px; overflow: hidden;
+  }
+  .cf-post-head {
+    padding: 16px 18px 12px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .cf-post-badge {
+    font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 6px;
+    white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+  }
+  .badge-urgent { background: rgba(255,59,48,0.18); color: #FF3B30; }
+  .badge-normal { background: rgba(255,214,10,0.15); color: #FFD60A; }
+  .badge-done   { background: rgba(52,199,89,0.15);  color: #34C759; }
+  .cf-post-content { flex: 1; }
+  .cf-post-title { font-size: 15px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+  .cf-post-body  { font-size: 13px; color: var(--grey); line-height: 1.65; white-space: pre-wrap; }
+  .cf-post-meta  {
+    display: flex; align-items: center; gap: 10px;
+    margin-top: 10px;
+  }
+  .cf-post-time  { font-size: 11px; color: var(--grey-2); flex: 1; }
+  .cf-post-status-btn {
+    font-size: 11px; background: var(--charcoal-3); border: none;
+    color: var(--grey); padding: 4px 10px; border-radius: 6px;
+    cursor: pointer; font-family: 'Noto Sans KR', 'Inter', sans-serif;
+    transition: all 0.15s;
+  }
+  .cf-post-status-btn:hover { color: var(--white); }
+  .cf-post-del {
+    background: none; border: none; color: var(--grey-2);
+    font-size: 13px; cursor: pointer; transition: color 0.15s;
+  }
+  .cf-post-del:hover { color: #FF3B30; }
+
+  /* 댓글 */
+  .cf-comments {
+    border-top: 1px solid var(--charcoal-3);
+    padding: 12px 18px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .cf-comment {
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+  .cf-comment-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--charcoal-3); flex-shrink: 0; margin-top: 6px;
+  }
+  .cf-comment-text { font-size: 13px; color: var(--white); flex: 1; line-height: 1.55; }
+  .cf-comment-time { font-size: 10px; color: var(--grey-2); white-space: nowrap; margin-top: 2px; }
+  .cf-comment-del {
+    background: none; border: none; color: var(--grey-2);
+    font-size: 12px; cursor: pointer; padding: 0;
+    transition: color 0.15s; flex-shrink: 0;
+  }
+  .cf-comment-del:hover { color: #FF3B30; }
+  .cf-comment-form {
+    display: flex; gap: 8px; align-items: center; margin-top: 4px;
+  }
+  .cf-comment-input {
+    flex: 1; background: var(--charcoal-3); border: none; outline: none;
+    color: var(--white); font-size: 12px; padding: 7px 12px;
+    border-radius: 8px; font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  }
+  .cf-comment-input::placeholder { color: var(--grey-2); }
+  .cf-comment-submit {
+    background: var(--charcoal-3); border: none; color: var(--white);
+    font-size: 12px; padding: 7px 14px; border-radius: 8px;
+    cursor: pointer; white-space: nowrap;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+    transition: background 0.15s;
+  }
+  .cf-comment-submit:hover { background: rgba(255,255,255,0.15); }
+
   /* ───── MILESTONE FULL PAGE ───── */
   #milestoneBanner:hover { opacity: 0.85; }
 
@@ -1000,6 +1181,11 @@
       <div class="verse-text" id="verseText">말씀을 불러오는 중...</div>
       <div class="verse-ref" id="verseRef"></div>
     </div>
+    <div class="header-divider"></div>
+    <button class="confirm-btn" id="confirmBtn">
+      <div class="confirm-label">컨펌 필요사항</div>
+      <div class="confirm-count" id="confirmCount">0</div>
+    </button>
   </div>
   <button class="hamburger-btn" id="hamburgerBtn">
     <span></span><span></span><span></span>
@@ -1639,6 +1825,165 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 
+<!-- ─── SCRIPT: CONFIRM PAGE ─── -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var CF_KEY = 'petigo_confirm';
+  function load() { try { return JSON.parse(localStorage.getItem(CF_KEY)) || []; } catch(e) { return []; } }
+  function save(d) { localStorage.setItem(CF_KEY, JSON.stringify(d)); }
+
+  var cfPage    = document.getElementById('cfPage');
+  var cfBack    = document.getElementById('cfBack');
+  var confirmBtn= document.getElementById('confirmBtn');
+  var cfTotal   = document.getElementById('cfTotal');
+  var confirmCount = document.getElementById('confirmCount');
+  var cfPosts   = document.getElementById('cfPosts');
+  var cfSubmit  = document.getElementById('cfSubmit');
+  var cfInputTitle = document.getElementById('cfInputTitle');
+  var cfInputBody  = document.getElementById('cfInputBody');
+  var cfPrioritySel= document.getElementById('cfPrioritySel');
+
+  var badgeClass = { urgent:'badge-urgent', normal:'badge-normal', done:'badge-done' };
+  var badgeLabel = { urgent:'🔴 긴급', normal:'🟡 보통', done:'✅ 완료' };
+
+  function updateHeaderCount() {
+    var data = load();
+    var pending = data.filter(function(p){ return p.priority !== 'done'; }).length;
+    confirmCount.textContent = pending;
+    cfTotal.textContent = data.length + '건';
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/
+/g,'<br>');
+  }
+
+  function timeStr() {
+    return new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  }
+
+  function renderPosts() {
+    var data = load();
+    updateHeaderCount();
+    if (!data.length) {
+      cfPosts.innerHTML = '<div class="cf-empty">등록된 컨펌 사항이 없습니다.</div>';
+      return;
+    }
+    cfPosts.innerHTML = data.map(function(post, pi) {
+      var commentsHtml = (post.comments || []).map(function(cm, ci) {
+        return '<div class="cf-comment" data-pi="'+pi+'" data-ci="'+ci+'">'
+          + '<div class="cf-comment-dot"></div>'
+          + '<div style="flex:1">'
+          + '<div class="cf-comment-text">'+esc(cm.text)+'</div>'
+          + '<div class="cf-comment-time">'+cm.time+'</div>'
+          + '</div>'
+          + '<button class="cf-comment-del" data-pi="'+pi+'" data-ci="'+ci+'">×</button>'
+          + '</div>';
+      }).join('');
+
+      return '<div class="cf-post" data-pi="'+pi+'">'
+        + '<div class="cf-post-head">'
+        + '<span class="cf-post-badge '+badgeClass[post.priority]+'">'+badgeLabel[post.priority]+'</span>'
+        + '<div class="cf-post-content">'
+        + '<div class="cf-post-title">'+esc(post.title)+'</div>'
+        + (post.body ? '<div class="cf-post-body">'+esc(post.body)+'</div>' : '')
+        + '<div class="cf-post-meta">'
+        + '<span class="cf-post-time">'+post.time+'</span>'
+        + '<button class="cf-post-status-btn" data-pi="'+pi+'">상태 변경</button>'
+        + '<button class="cf-post-del" data-pi="'+pi+'">삭제</button>'
+        + '</div>'
+        + '</div>'
+        + '</div>'
+        + '<div class="cf-comments">'
+        + commentsHtml
+        + '<div class="cf-comment-form">'
+        + '<input class="cf-comment-input" data-pi="'+pi+'" type="text" placeholder="댓글을 입력하세요...">'
+        + '<button class="cf-comment-submit" data-pi="'+pi+'">등록</button>'
+        + '</div>'
+        + '</div>'
+        + '</div>';
+    }).join('');
+
+    // 상태 변경
+    cfPosts.querySelectorAll('.cf-post-status-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var pi = parseInt(btn.dataset.pi);
+        var data = load();
+        var order = ['urgent','normal','done'];
+        var cur = order.indexOf(data[pi].priority);
+        data[pi].priority = order[(cur + 1) % order.length];
+        save(data); renderPosts();
+      });
+    });
+
+    // 게시글 삭제
+    cfPosts.querySelectorAll('.cf-post-del').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var data = load();
+        data.splice(parseInt(btn.dataset.pi), 1);
+        save(data); renderPosts();
+      });
+    });
+
+    // 댓글 삭제
+    cfPosts.querySelectorAll('.cf-comment-del').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        var data = load();
+        data[parseInt(btn.dataset.pi)].comments.splice(parseInt(btn.dataset.ci), 1);
+        save(data); renderPosts();
+      });
+    });
+
+    // 댓글 등록
+    cfPosts.querySelectorAll('.cf-comment-submit').forEach(function(btn) {
+      var pi = parseInt(btn.dataset.pi);
+      var input = cfPosts.querySelector('.cf-comment-input[data-pi="'+pi+'"]');
+      function submit() {
+        var text = input.value.trim();
+        if (!text) return;
+        var data = load();
+        if (!data[pi].comments) data[pi].comments = [];
+        data[pi].comments.push({ text: text, time: timeStr() });
+        save(data); renderPosts();
+      }
+      btn.addEventListener('click', submit);
+      input.addEventListener('keydown', function(e) { if (e.key === 'Enter') submit(); });
+    });
+  }
+
+  // 등록
+  cfSubmit.addEventListener('click', function() {
+    var title = cfInputTitle.value.trim();
+    if (!title) { cfInputTitle.focus(); return; }
+    var data = load();
+    data.unshift({
+      id: Date.now(), title: title,
+      body: cfInputBody.value.trim(),
+      priority: cfPrioritySel.value,
+      time: timeStr(), comments: []
+    });
+    save(data);
+    cfInputTitle.value = '';
+    cfInputBody.value  = '';
+    cfPrioritySel.value = 'normal';
+    renderPosts();
+  });
+
+  // 열기/닫기
+  confirmBtn.addEventListener('click', function() {
+    cfPage.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderPosts();
+  });
+  cfBack.addEventListener('click', function() {
+    cfPage.classList.remove('open');
+    document.body.style.overflow = '';
+  });
+
+  updateHeaderCount();
+});
+</script>
+
 <!-- ─── SCRIPT: MILESTONE PAGE ─── -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
@@ -2273,6 +2618,32 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 
 
+  </div>
+</div>
+
+<!-- ─── CONFIRM PAGE ─── -->
+<div class="cf-page" id="cfPage">
+  <div class="cf-header">
+    <button class="cf-back" id="cfBack">&#8592; 돌아가기</button>
+    <div class="cf-title">컨펌 필요사항</div>
+    <div class="cf-total" id="cfTotal">0건</div>
+  </div>
+  <div class="cf-body">
+    <!-- 새 항목 작성 폼 -->
+    <div class="cf-form">
+      <input  class="cf-input-title" id="cfInputTitle" type="text" placeholder="제목 (예: 패딩 컬러 최종 결정 필요)">
+      <textarea class="cf-input-body" id="cfInputBody" placeholder="내용을 입력하세요..."></textarea>
+      <div class="cf-form-row">
+        <select class="cf-priority-sel" id="cfPrioritySel">
+          <option value="urgent">🔴 긴급</option>
+          <option value="normal" selected>🟡 보통</option>
+          <option value="done">✅ 완료</option>
+        </select>
+        <button class="cf-submit" id="cfSubmit">등록</button>
+      </div>
+    </div>
+    <!-- 게시글 목록 -->
+    <div class="cf-posts" id="cfPosts"></div>
   </div>
 </div>
 
