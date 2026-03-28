@@ -49,9 +49,28 @@
     border-bottom: 1px solid var(--charcoal-3);
   }
 
-  .header-left { display: flex; flex-direction: column; gap: 14px; }
+  .header-left {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+  }
 
   .logo-area { display: flex; align-items: center; gap: 14px; }
+
+  .header-divider {
+    width: 1px;
+    height: 40px;
+    background: var(--charcoal-3);
+    margin: 0 24px;
+    flex-shrink: 0;
+  }
+
+  .header-dday {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
 
   .logo-mark {
     width: 44px; height: 44px;
@@ -73,15 +92,7 @@
     letter-spacing: 1px; margin-top: 2px;
   }
 
-  /* 날짜·D-day — 로고 아래, 텍스트 기준 왼쪽 맞춤 */
-  .header-date {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding-left: 58px; /* 44px logo + 14px gap */
-  }
-
-  .today { font-size: 13px; color: var(--grey); }
+  .today { font-size: 11px; color: var(--grey); }
   .dday-wrap { display: flex; align-items: center; gap: 8px; }
   .dday { font-size: 22px; font-weight: 800; color: var(--orange); }
   .dday-label { font-size: 11px; color: var(--grey); }
@@ -729,7 +740,8 @@
     .products-grid { grid-template-columns: repeat(2, 1fr); }
     .strategy-grid { grid-template-columns: 1fr; }
     body { padding: 20px 16px 48px; }
-    .header-date { padding-left: 0; flex-wrap: wrap; gap: 12px; }
+    .header-left { flex-wrap: wrap; gap: 12px; }
+    .header-divider { display: none; }
     .changelog-drawer { width: 100vw; right: -100vw; }
   }
 </style>
@@ -762,7 +774,8 @@
         <div class="brand-sub">TECHWEAR · OUTDOOR PET GEAR BRAND</div>
       </div>
     </div>
-    <div class="header-date">
+    <div class="header-divider"></div>
+    <div class="header-dday">
       <div class="today">2026년 3월 28일 (토) 기준</div>
       <div class="dday-wrap">
         <div class="dday">D-197</div>
