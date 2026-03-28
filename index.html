@@ -1204,6 +1204,44 @@
   }
   .cf-comment-submit:hover { background: rgba(255,255,255,0.15); }
 
+  /* 댓글 작성자 */
+  .cf-author-sel {
+    background: var(--charcoal-3); border: none;
+    color: var(--white); font-size: 12px; padding: 6px 10px;
+    border-radius: 8px; cursor: pointer; flex-shrink: 0;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  }
+  .cf-comment-author {
+    font-size: 11px; font-weight: 700; margin-bottom: 2px;
+  }
+  /* 파일 첨부 (폼) */
+  .cf-file-row {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .cf-file-label {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--charcoal-3); color: var(--grey);
+    font-size: 12px; padding: 6px 12px; border-radius: 8px;
+    cursor: pointer; transition: color 0.15s;
+    font-family: 'Noto Sans KR', 'Inter', sans-serif;
+  }
+  .cf-file-label:hover { color: var(--white); }
+  .cf-file-names { font-size: 11px; color: var(--grey); flex: 1; }
+  /* 첨부파일 표시 */
+  .cf-post-files {
+    padding: 8px 18px 12px;
+    display: flex; flex-wrap: wrap; gap: 8px;
+    border-top: 1px solid var(--charcoal-3);
+  }
+  .cf-post-file-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--charcoal-3); border-radius: 8px;
+    padding: 5px 10px; font-size: 11px; color: var(--grey);
+    cursor: pointer; text-decoration: none;
+    transition: color 0.15s;
+  }
+  .cf-post-file-item:hover { color: var(--white); }
+
   /* ───── MILESTONE FULL PAGE ───── */
   #milestoneBanner:hover { opacity: 0.85; }
 
@@ -1958,19 +1996,57 @@ document.addEventListener('DOMContentLoaded', function () {
   function load() { try { return JSON.parse(localStorage.getItem(CF_KEY)) || []; } catch(e) { return []; } }
   function save(d) { localStorage.setItem(CF_KEY, JSON.stringify(d)); }
 
-  var cfPage    = document.getElementById('cfPage');
-  var cfBack    = document.getElementById('cfBack');
-  var confirmBtn= document.getElementById('confirmBtn');
-  var cfTotal   = document.getElementById('cfTotal');
+  var cfPage       = document.getElementById('cfPage');
+  var cfBack       = document.getElementById('cfBack');
+  var confirmBtn   = document.getElementById('confirmBtn');
+  var cfTotal      = document.getElementById('cfTotal');
   var confirmCount = document.getElementById('confirmCount');
-  var cfPosts   = document.getElementById('cfPosts');
-  var cfSubmit  = document.getElementById('cfSubmit');
+  var cfPosts      = document.getElementById('cfPosts');
+  var cfSubmit     = document.getElementById('cfSubmit');
   var cfInputTitle = document.getElementById('cfInputTitle');
   var cfInputBody  = document.getElementById('cfInputBody');
   var cfPrioritySel= document.getElementById('cfPrioritySel');
+  var cfFileInput  = document.getElementById('cfFileInput');
+  var cfFileNames  = document.getElementById('cfFileNames');
 
   var badgeClass = { urgent:'badge-urgent', normal:'badge-normal', done:'badge-done' };
   var badgeLabel = { urgent:'🔴 긴급', normal:'🟡 보통', done:'✅ 완료' };
+
+  var PERSONS = [
+    { value: 'jeon', label: '전실장', color: 'var(--color-jeon)' },
+    { value: 'yoo',  label: '유실장', color: 'var(--color-yoo)'  },
+    { value: 'ceo',  label: '대표',   color: 'var(--color-ceo)'  }
+  ];
+  function personColor(v) {
+    var p = PERSONS.find(function(x){return x.value===v;});
+    return p ? p.color : 'var(--grey)';
+  }
+  function personLabel(v) {
+    var p = PERSONS.find(function(x){return x.value===v;});
+    return p ? p.label : v;
+  }
+
+  // pending 파일 (base64)
+  var pendingFiles = [];
+  cfFileInput.addEventListener('change', function() {
+    pendingFiles = [];
+    cfFileNames.textContent = '';
+    var names = [];
+    var files = Array.from(cfFileInput.files);
+    var done = 0;
+    if (!files.length) { cfFileNames.textContent = '선택된 파일 없음'; return; }
+    files.forEach(function(file) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        pendingFiles.push({ name: file.name, type: file.type, data: e.target.result });
+        done++;
+        if (done === files.length) {
+          cfFileNames.textContent = files.map(function(f){return f.name;}).join(', ');
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  });
 
   function updateHeaderCount() {
     var data = load();
@@ -1980,9 +2056,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function esc(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/
+/g,'<br>');
   }
-
   function timeStr() {
     return new Date().toLocaleString('ko-KR',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
   }
@@ -1995,16 +2071,40 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
     cfPosts.innerHTML = data.map(function(post, pi) {
+      // 댓글 HTML
       var commentsHtml = (post.comments || []).map(function(cm, ci) {
+        var color = personColor(cm.author);
+        var authorName = personLabel(cm.author);
         return '<div class="cf-comment" data-pi="'+pi+'" data-ci="'+ci+'">'
-          + '<div class="cf-comment-dot"></div>'
+          + '<div class="cf-comment-dot" style="background:'+color+'"></div>'
           + '<div style="flex:1">'
+          + '<div class="cf-comment-author" style="color:'+color+'">'+esc(authorName)+'</div>'
           + '<div class="cf-comment-text">'+esc(cm.text)+'</div>'
           + '<div class="cf-comment-time">'+cm.time+'</div>'
           + '</div>'
           + '<button class="cf-comment-del" data-pi="'+pi+'" data-ci="'+ci+'">×</button>'
           + '</div>';
       }).join('');
+
+      // 댓글 입력 폼 (작성자 선택 포함)
+      var personOptions = PERSONS.map(function(p) {
+        return '<option value="'+p.value+'">'+p.label+'</option>';
+      }).join('');
+      var commentForm = '<div class="cf-comment-form">'
+        + '<select class="cf-author-sel" data-pi="'+pi+'">'+personOptions+'</select>'
+        + '<input class="cf-comment-input" data-pi="'+pi+'" type="text" placeholder="댓글을 입력하세요...">'
+        + '<button class="cf-comment-submit" data-pi="'+pi+'">등록</button>'
+        + '</div>';
+
+      // 첨부파일 HTML
+      var filesHtml = '';
+      if (post.files && post.files.length) {
+        filesHtml = '<div class="cf-post-files">'
+          + post.files.map(function(f) {
+              return '<a class="cf-post-file-item" href="'+f.data+'" download="'+esc(f.name)+'" target="_blank">📎 '+esc(f.name)+'</a>';
+            }).join('')
+          + '</div>';
+      }
 
       return '<div class="cf-post" data-pi="'+pi+'">'
         + '<div class="cf-post-head">'
@@ -2019,12 +2119,10 @@ document.addEventListener('DOMContentLoaded', function () {
         + '</div>'
         + '</div>'
         + '</div>'
+        + (filesHtml)
         + '<div class="cf-comments">'
         + commentsHtml
-        + '<div class="cf-comment-form">'
-        + '<input class="cf-comment-input" data-pi="'+pi+'" type="text" placeholder="댓글을 입력하세요...">'
-        + '<button class="cf-comment-submit" data-pi="'+pi+'">등록</button>'
-        + '</div>'
+        + commentForm
         + '</div>'
         + '</div>';
     }).join('');
@@ -2062,13 +2160,14 @@ document.addEventListener('DOMContentLoaded', function () {
     // 댓글 등록
     cfPosts.querySelectorAll('.cf-comment-submit').forEach(function(btn) {
       var pi = parseInt(btn.dataset.pi);
-      var input = cfPosts.querySelector('.cf-comment-input[data-pi="'+pi+'"]');
+      var input  = cfPosts.querySelector('.cf-comment-input[data-pi="'+pi+'"]');
+      var selEl  = cfPosts.querySelector('.cf-author-sel[data-pi="'+pi+'"]');
       function submit() {
         var text = input.value.trim();
         if (!text) return;
         var data = load();
         if (!data[pi].comments) data[pi].comments = [];
-        data[pi].comments.push({ text: text, time: timeStr() });
+        data[pi].comments.push({ author: selEl.value, text: text, time: timeStr() });
         save(data); renderPosts();
       }
       btn.addEventListener('click', submit);
@@ -2085,24 +2184,39 @@ document.addEventListener('DOMContentLoaded', function () {
       id: Date.now(), title: title,
       body: cfInputBody.value.trim(),
       priority: cfPrioritySel.value,
+      files: pendingFiles.slice(),
       time: timeStr(), comments: []
     });
     save(data);
     cfInputTitle.value = '';
     cfInputBody.value  = '';
     cfPrioritySel.value = 'normal';
+    cfFileInput.value = '';
+    cfFileNames.textContent = '선택된 파일 없음';
+    pendingFiles = [];
     renderPosts();
   });
 
   // 열기/닫기
-  confirmBtn.addEventListener('click', function() {
+  function openCf() {
     cfPage.classList.add('open');
     document.body.style.overflow = 'hidden';
     renderPosts();
-  });
-  cfBack.addEventListener('click', function() {
+  }
+  function closeCf() {
     cfPage.classList.remove('open');
     document.body.style.overflow = '';
+  }
+  confirmBtn.addEventListener('click', openCf);
+  cfBack.addEventListener('click', closeCf);
+
+  // 좌우 여백 클릭 시 닫기
+  cfPage.addEventListener('click', function(e) {
+    var body = cfPage.querySelector('.cf-body');
+    var header = cfPage.querySelector('.cf-header');
+    if (!body.contains(e.target) && !header.contains(e.target)) {
+      closeCf();
+    }
   });
 
   updateHeaderCount();
@@ -2805,6 +2919,13 @@ document.addEventListener('DOMContentLoaded', function () {
     <div class="cf-form">
       <input  class="cf-input-title" id="cfInputTitle" type="text" placeholder="제목 (예: 패딩 컬러 최종 결정 필요)">
       <textarea class="cf-input-body" id="cfInputBody" placeholder="내용을 입력하세요..."></textarea>
+      <div class="cf-file-row">
+        <label class="cf-file-label">
+          📎 파일 첨부
+          <input type="file" id="cfFileInput" multiple style="display:none">
+        </label>
+        <span class="cf-file-names" id="cfFileNames">선택된 파일 없음</span>
+      </div>
       <div class="cf-form-row">
         <select class="cf-priority-sel" id="cfPrioritySel">
           <option value="urgent">🔴 긴급</option>
