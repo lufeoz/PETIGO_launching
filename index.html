@@ -1774,13 +1774,13 @@
 
 <!-- ─── SCRIPT: PRODUCT BOARD ─── -->
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
   var BOARD_KEY = 'petigo_product_board';
   function loadBoard() { try { return JSON.parse(localStorage.getItem(BOARD_KEY)) || {}; } catch(e) { return {}; } }
   function saveBoard(b) { localStorage.setItem(BOARD_KEY, JSON.stringify(b)); }
 
   var currentProduct = null;
-  var pendingImgs = [];
+  var pendingImgs    = [];
 
   var page      = document.getElementById('pmPage');
   var nameEl    = document.getElementById('pmProductName');
@@ -1793,9 +1793,10 @@
   var zoomOv    = document.getElementById('pmZoomOverlay');
   var zoomImg   = document.getElementById('pmZoomImg');
 
+  /* ── 열기/닫기 ── */
   function openPage(productName) {
     currentProduct = productName;
-    pendingImgs = [];
+    pendingImgs    = [];
     previews.innerHTML = '';
     textarea.value = '';
     nameEl.textContent = productName;
@@ -1812,10 +1813,11 @@
 
   document.getElementById('pmBack').addEventListener('click', closePage);
 
-  fileInput.addEventListener('change', function() {
-    Array.from(fileInput.files).forEach(function(file) {
+  /* ── 사진 업로드 ── */
+  fileInput.addEventListener('change', function () {
+    Array.from(fileInput.files).forEach(function (file) {
       var reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         pendingImgs.push(e.target.result);
         renderPreviews();
       };
@@ -1826,7 +1828,7 @@
 
   function renderPreviews() {
     previews.innerHTML = '';
-    pendingImgs.forEach(function(src, i) {
+    pendingImgs.forEach(function (src, i) {
       var wrap = document.createElement('div');
       wrap.className = 'pm-img-thumb-wrap';
       var img = document.createElement('img');
@@ -1834,21 +1836,22 @@
       var del = document.createElement('button');
       del.className = 'pm-img-thumb-del';
       del.textContent = '×';
-      del.onclick = function() { pendingImgs.splice(i, 1); renderPreviews(); };
+      del.onclick = function () { pendingImgs.splice(i, 1); renderPreviews(); };
       wrap.appendChild(img);
       wrap.appendChild(del);
       previews.appendChild(wrap);
     });
   }
 
-  submitBtn.addEventListener('click', function() {
+  /* ── 등록 ── */
+  submitBtn.addEventListener('click', function () {
     var text = textarea.value.trim();
     if (!text && pendingImgs.length === 0) return;
     var board = loadBoard();
     if (!board[currentProduct]) board[currentProduct] = [];
     var now = new Date();
     board[currentProduct].unshift({
-      id: Date.now(),
+      id:   Date.now(),
       time: now.toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }),
       text: text,
       imgs: pendingImgs.slice()
@@ -1860,66 +1863,63 @@
     renderPosts();
   });
 
-  function escHtml(s) {
+  /* ── 게시글 렌더링 ── */
+  function esc(s) {
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
 
   function renderPosts() {
     var board = loadBoard();
-    var posts = board[currentProduct] || [];
+    var posts = (board[currentProduct] || []);
     countEl.textContent = posts.length + '개';
     if (!posts.length) {
       postsEl.innerHTML = '<div class="pm-empty">아직 기록이 없습니다.<br>첫 번째 기록을 남겨보세요.</div>';
       return;
     }
-    postsEl.innerHTML = posts.map(function(post, i) {
-      var imgsHtml = (post.imgs && post.imgs.length)
-        ? '<div class="pm-post-imgs">' + post.imgs.map(function(src) {
-            return '<img src="' + src + '" data-zoom="' + src + '">';
-          }).join('') + '</div>'
-        : '';
+    postsEl.innerHTML = posts.map(function (post, i) {
+      var imgs = (post.imgs && post.imgs.length)
+        ? '<div class="pm-post-imgs">' +
+          post.imgs.map(function (s) { return '<img src="' + s + '" data-zoom="' + s + '">'; }).join('') +
+          '</div>' : '';
       return '<div class="pm-post">'
         + '<div class="pm-post-meta">'
         + '<span class="pm-post-time">' + post.time + '</span>'
         + '<button class="pm-post-del" data-idx="' + i + '">삭제</button>'
         + '</div>'
-        + (post.text ? '<div class="pm-post-text">' + escHtml(post.text) + '</div>' : '')
-        + imgsHtml
-        + '</div>';
+        + (post.text ? '<div class="pm-post-text">' + esc(post.text) + '</div>' : '')
+        + imgs + '</div>';
     }).join('');
 
-    postsEl.querySelectorAll('.pm-post-del').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        var idx = parseInt(btn.dataset.idx);
+    postsEl.querySelectorAll('.pm-post-del').forEach(function (btn) {
+      btn.addEventListener('click', function () {
         var board = loadBoard();
-        board[currentProduct].splice(idx, 1);
+        board[currentProduct].splice(parseInt(btn.dataset.idx), 1);
         saveBoard(board);
         renderPosts();
       });
     });
 
-    postsEl.querySelectorAll('[data-zoom]').forEach(function(img) {
-      img.addEventListener('click', function() {
+    postsEl.querySelectorAll('[data-zoom]').forEach(function (img) {
+      img.addEventListener('click', function () {
         zoomImg.src = img.dataset.zoom;
         zoomOv.classList.add('open');
       });
     });
   }
 
-  zoomOv.addEventListener('click', function() {
+  /* ── 이미지 줌 닫기 ── */
+  zoomOv.addEventListener('click', function () {
     zoomOv.classList.remove('open');
     zoomImg.src = '';
   });
 
-  function initProductCards() {
-    document.querySelectorAll('.products-grid .product-card').forEach(function(card) {
-      var name = card.querySelector('.product-name').textContent.trim();
-      card.addEventListener('click', function() { openPage(name); });
-    });
-  }
-
-  document.addEventListener('DOMContentLoaded', initProductCards);
-})();
+  /* ── 제품 카드 클릭 연결 ── */
+  document.querySelectorAll('.products-grid .product-card').forEach(function (card) {
+    var name = card.querySelector('.product-name').textContent.trim();
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function () { openPage(name); });
+  });
+});
 </script>
 
 <!-- ─── SCRIPT: EDITABLE NEXT ACTIONS + CHANGELOG ─── -->
